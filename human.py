@@ -59,16 +59,7 @@ class Player(Human):
     def get_mousepos(self):
         if pg.mouse.get_pressed()[0]:
             movement = pg.mouse.get_rel()[0]
-            if movement > 10:
-                self.front += TURNING_SPEED
-                print(self.front)
-            elif movement < -10:
-                self.front -= TURNING_SPEED
-                print(self.front)
-        if self.front < 0:
-            self.front = 2*math.pi - (self.front % (2*math.pi))
-        elif self.front > 2*math.pi:
-            self.front = self.front % (2*math.pi)
+            self.front += movement*TURNING_SPEED
 
 class Terrorist(Human):
     def drawImage(self):
