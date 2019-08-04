@@ -17,7 +17,6 @@ class Game:
 
     def new(self):
         self.all_sprites = pg.sprite.Group()
-
         #testing only
         self.player = Player(self, 4, 5)
         Terrorist(self, 10, 5)
