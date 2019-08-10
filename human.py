@@ -18,7 +18,11 @@ class Human(pg.sprite.Sprite):
     def drawImage(self):
         pass
 
+    def ai_update(self):
+        pass
+
     def update(self):
+        self.ai_update()
         self.loc.x += self.vx * self.game.dt
         self.loc.y += self.vy * self.game.dt
         self.rect.x = self.loc.x
@@ -59,7 +63,16 @@ class Player(Human):
             movement = pg.mouse.get_rel()[0]
             self.front += movement*PLAYER_TURN
 
+    def update(self):
+        self.get_mousepos()
+        self.get_keys()
+        super().update()
+
 class Terrorist(Human):
+    def __init__(self, game, x, y):
+        super().__init__(game, x, y)
+        self.shoot_count = 0
+
     def drawImage(self):
         terrorist = pg.Surface((TILESIZE, TILESIZE))
         terrorist.fill(WHITE)
@@ -68,17 +81,27 @@ class Terrorist(Human):
         return terrorist
 
     def ai_update(self):
-        pass
+        self.shoot_count += 1
+        if self.shoot_count >= SHOOT_INTERVAL:
+            self.shoot()
 
     def shoot(self):
         bullet_x = self.rect.centerx + (TILESIZE//2 * math.cos(self.front))
         bullet_y = self.rect.centery + (TILESIZE//2 * math.sin(self.front))
         Bullet(self.game, self.front, bullet_x, bullet_y)
+        self.shoot_count = 0
 
 class Civilian(Human):
+    def __init__(self, game, x, y):
+        super().__init__(game, x, y)
+        self.add(self.game.civilians)
+
     def drawImage(self):
         civilian = pg.Surface((TILESIZE, TILESIZE))
         civilian.fill(WHITE)
         civilian.set_colorkey(WHITE)
         pg.draw.circle(civilian, YELLOW, (TILESIZE//2, TILESIZE//2), TILESIZE//2)
         return civilian
+
+    def ai_update(self):
+        pass

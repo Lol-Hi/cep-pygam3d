@@ -3,7 +3,7 @@ from settings import *
 
 class Obstacle(pg.sprite.Sprite):
     def __init__(self, game, x, y):
-        self.groups = game.all_sprites
+        self.groups = game.all_sprites, game.obstacles
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.image = self.drawImage()
@@ -15,7 +15,7 @@ class Obstacle(pg.sprite.Sprite):
         obstacle.fill(LIGHTBLUE)
         return obstacle
 
-    def update():
+    def update(self):
         self.rect.x = self.loc.x
         self.rect.y = self.loc.y
 

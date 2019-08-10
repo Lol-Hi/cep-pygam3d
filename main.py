@@ -17,8 +17,11 @@ class Game:
 
     def new(self):
         self.all_sprites = pg.sprite.Group()
+        self.civilians = pg.sprite.Group()
+        self.obstacles = pg.sprite.Group()
         #testing only
         self.player = Player(self, 4, 5)
+        Obstacle(self, 5, 5)
         Terrorist(self, 10, 5)
         Terrorist(self, 12, 7)
         Civilian(self, 5, 12)
@@ -32,10 +35,9 @@ class Game:
             self.events()
             self.update()
             self.draw()
+        self.end()
 
     def update(self):
-        self.player.get_mousepos()
-        self.player.get_keys()
         self.all_sprites.update()
 
     def events(self):
@@ -50,6 +52,11 @@ class Game:
         self.screen.fill(WHITE)
         self.all_sprites.draw(self.screen)
         pg.display.flip()
+
+    def end(self):
+        self.all_sprites.empty()
+        self.humans.empty()
+        self.obstacles.empty()
 
     def quit(self):
         pg.quit()
