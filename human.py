@@ -82,8 +82,48 @@ class Terrorist(Human):
 
     def ai_update(self):
         self.shoot_count += 1
-        if self.shoot_count >= SHOOT_INTERVAL:
-            self.shoot()
+        self.front += math.pi/300
+        if self.front >= math.pi:
+            self.front -= 2*math.pi
+        can_see = self.see()
+        if self.shoot_count >= SHOOT_INTERVAL and len(can_see) > 0:
+            shoot = True
+            for person in can_see:
+                shoot &= person["phi"] >= self.front-AIM_RANGE and person["phi"] <= self.front+AIM_RANGE
+            if shoot:
+                self.shoot()
+
+    def see(self):
+        in_range_obs = []
+        for obstacle in self.game.obstacles.sprites():
+            phi = math.atan2(
+                obstacle.loc.y-self.loc.y,
+                obstacle.loc.x-self.loc.x
+            )
+            dist = math.sqrt(
+                (obstacle.loc.y-self.loc.y)**2+\
+                (obstacle.loc.x-self.loc.x)**2
+            )
+            if phi >= self.front-SIGHT_RANGE and phi <= self.front+SIGHT_RANGE:
+                in_range_obs.append((obstacle, phi, dist))
+        good_people = self.game.civilians.sprites() + [self.game.player]
+        can_see = []
+        for person in good_people:
+            phi_p = math.atan2(
+                person.loc.y-self.loc.y,
+                person.loc.x-self.loc.x
+            )
+            dist_p = math.sqrt(
+                (person.loc.y-self.loc.y)**2+\
+                (person.loc.x-self.loc.x)**2
+            )
+            if phi_p >= self.front-SIGHT_RANGE and phi_p <= self.front+SIGHT_RANGE:
+                person_visible = True
+                for obstacle, phi_o, dist_o in in_range_obs:
+                    person_visible &= not(math.isclose(phi_p, phi_o, rel_tol=0.05) and dist_o < dist_p)
+                if person_visible:
+                    can_see.append({"person": person, "phi": phi_p, "dist": dist_p})
+        return can_see
 
     def shoot(self):
         bullet_x = self.rect.centerx + (TILESIZE//2 * math.cos(self.front))
