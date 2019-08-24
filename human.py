@@ -61,7 +61,7 @@ class Player(Human):
     def get_mousepos(self):
         if pg.mouse.get_pressed()[0]:
             movement = pg.mouse.get_rel()[0]
-            self.front += movement*PLAYER_TURN
+            self.front += movement*HUMAN_TURN
 
     def update(self):
         self.get_mousepos()
@@ -72,6 +72,7 @@ class Terrorist(Human):
     def __init__(self, game, x, y):
         super().__init__(game, x, y)
         self.shoot_count = 0
+        self.aimed = None
 
     def drawImage(self):
         terrorist = pg.Surface((TILESIZE, TILESIZE))
@@ -81,17 +82,27 @@ class Terrorist(Human):
         return terrorist
 
     def ai_update(self):
+        self.search_aim()
+
+    def search_aim(self):
         self.shoot_count += 1
-        self.front += math.pi/300
+        if self.aimed:
+            if self.shoot_count >= SHOOT_INTERVAL and self.aimed.alive():
+                self.shoot()
+                return
+            else:
+                self.aimed = None
+        can_see = self.see()
+        shoot = True
+        min_turn = HUMAN_TURN
+        for person in can_see:
+            to_turn = abs(person["phi"]-self.front)
+            if to_turn < min_turn:
+                min_turn = to_turn
+                self.aimed = person["person"]
+        self.front += min_turn
         if self.front >= math.pi:
             self.front -= 2*math.pi
-        can_see = self.see()
-        if self.shoot_count >= SHOOT_INTERVAL and len(can_see) > 0:
-            shoot = True
-            for person in can_see:
-                shoot &= person["phi"] >= self.front-AIM_RANGE and person["phi"] <= self.front+AIM_RANGE
-            if shoot:
-                self.shoot()
 
     def see(self):
         in_range_obs = []

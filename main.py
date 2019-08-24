@@ -25,7 +25,7 @@ class Game:
         Terrorist(self, 10, 5)
         Terrorist(self, 12, 7)
         Civilian(self, 5, 12)
-        Civilian(self, 9, 13)
+        Civilian(self, 9, 2)
         Civilian(self, 13, 11)
 
     def run(self):
