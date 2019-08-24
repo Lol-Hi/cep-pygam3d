@@ -26,7 +26,40 @@ class Human(pg.sprite.Sprite):
         self.loc.x += self.vx * self.game.dt
         self.loc.y += self.vy * self.game.dt
         self.rect.x = self.loc.x
+        hit_x = self.collision_check('x')
         self.rect.y = self.loc.y
+        hit_x = self.collision_check('y')
+
+
+    def collision_check(self, dir):
+        if dir == 'x':
+            hits = pg.sprite.spritecollide(self, self.game.obstacles, False)
+            if hits:
+                if self.vx > 0:
+                    self.loc.x = hits[0].rect.left - self.rect.width
+                if self.vx < 0:
+                    self.loc.x = hits[0].rect.right
+                self.vx = 0
+                self.rect.x = self.loc.x
+            return hits
+        if dir == 'y':
+            hits = pg.sprite.spritecollide(self, self.game.obstacles, False)
+            if hits:
+                if self.vy > 0:
+                    self.loc.y = hits[0].rect.top - self.rect.height
+                if self.vy < 0:
+                    self.loc.y = hits[0].rect.bottom
+                self.vy = 0
+                self.rect.y = self.loc.y
+            return hits
+
+    def rotate(theta):
+        self.front += theta
+        if self.front > math.pi:
+            self.front -= 2*math.pi
+        if self.front < -math.pi:
+            self.front += 2*math.pi
+
 
     def draw(self, screen):
         screen.blit(self.image, self.rect)
@@ -81,6 +114,11 @@ class Terrorist(Human):
         pg.draw.circle(terrorist, BLACK, (TILESIZE//2, TILESIZE//2), TILESIZE//2)
         return terrorist
 
+    def update(self):
+        super().update()
+        if hit_x or hit_y:
+            self.rotate(math.pi/4)
+
     def ai_update(self):
         self.search_aim()
 
@@ -100,9 +138,7 @@ class Terrorist(Human):
             if to_turn < min_turn:
                 min_turn = to_turn
                 self.aimed = person["person"]
-        self.front += min_turn
-        if self.front >= math.pi:
-            self.front -= 2*math.pi
+        self.rotate(min_turn)
 
     def see(self):
         in_range_obs = []
@@ -153,6 +189,11 @@ class Civilian(Human):
         civilian.set_colorkey(WHITE)
         pg.draw.circle(civilian, YELLOW, (TILESIZE//2, TILESIZE//2), TILESIZE//2)
         return civilian
+
+    def update(self):
+        super().update()
+        if hit_x or hit_y:
+            self.rotate(math.pi/4)
 
     def ai_update(self):
         pass
