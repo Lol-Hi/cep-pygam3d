@@ -19,6 +19,10 @@ class Coords:
     x = 1.5
     y = 5
     z = 5
+    def set(self, tup):
+        self.x = tup[0]
+        self.y = tup[1]
+        self.z = tup[2]
 
 class Data:
     screenheight = 500
