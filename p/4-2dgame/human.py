@@ -162,25 +162,19 @@ class Terrorist(Human):
             if in_range(phi, self.front-SIGHT_RANGE, self.front+SIGHT_RANGE):
                 person_visible = True
                 for obstacle in in_range_obs:
-                    intersect_left = lines_intersect(
+                    intersect_diag1 = lines_intersect(
                         self_pos,
                         person_pos,
                         obstacle.rect.topleft,
-                        obstacle.rect.bottomleft
+                        obstacle.rect.bottomright
                     )
-                    intersect_right = lines_intersect(
+                    intersect_diag2 = lines_intersect(
                         self_pos,
                         person_pos,
                         obstacle.rect.topright,
-                        obstacle.rect.bottomright
+                        obstacle.rect.bottomleft
                     )
-                    intersect_top = lines_intersect(
-                        self_pos,
-                        person_pos,
-                        obstacle.rect.topleft,
-                        obstacle.rect.topright
-                    )
-                    if intersect_left or intersect_right or intersect_top:
+                    if intersect_diag1 or intersect_diag2:
                         person_visible = False
                         break
                 if person_visible:
