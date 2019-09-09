@@ -28,7 +28,7 @@ class Human(pg.sprite.Sprite):
         self.rect.x = self.loc.x
         hit_x = self.collision_check('x')
         self.rect.y = self.loc.y
-        hit_x = self.collision_check('y')
+        hit_y = self.collision_check('y')
 
 
     def collision_check(self, dir):
@@ -53,7 +53,7 @@ class Human(pg.sprite.Sprite):
                 self.rect.y = self.loc.y
             return hits
 
-    def rotate(theta):
+    def rotate(self, theta):
         self.front += theta
         if self.front > math.pi:
             self.front -= 2*math.pi
@@ -114,10 +114,10 @@ class Terrorist(Human):
         pg.draw.circle(terrorist, BLACK, (TILESIZE//2, TILESIZE//2), TILESIZE//2)
         return terrorist
 
-    def update(self):
-        super().update()
-        if hit_x or hit_y:
-            self.rotate(math.pi/4)
+    # def update(self):
+    #     super().update()
+    #     if hit_x or hit_y:
+    #         self.rotate(math.pi/4)
 
     def ai_update(self):
         self.search_aim()
@@ -190,10 +190,10 @@ class Civilian(Human):
         pg.draw.circle(civilian, YELLOW, (TILESIZE//2, TILESIZE//2), TILESIZE//2)
         return civilian
 
-    def update(self):
-        super().update()
-        if hit_x or hit_y:
-            self.rotate(math.pi/4)
+    # def update(self):
+    #     super().update()
+    #     if hit_x or hit_y:
+    #         self.rotate(math.pi/4)
 
     def ai_update(self):
         pass
