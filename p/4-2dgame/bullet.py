@@ -30,7 +30,7 @@ class Bullet(pg.sprite.Sprite):
     def checkcollision(self):
         collided_humans = pg.sprite.spritecollide(self, self.game.civilians, True)
         collided_obstacles = pg.sprite.spritecollide(self, self.game.obstacles, False)
-        if len(collided_humans) + len(collided_obstacles) >= 1:
+        if collided_humans or collided_obstacles:
             self.kill()
         if pg.sprite.collide_rect(self, self.game.player):
             self.kill()

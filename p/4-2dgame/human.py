@@ -2,6 +2,8 @@ import pygame as pg
 from settings import *
 from bullet import *
 
+from math_func import *
+
 import math
 
 class Human(pg.sprite.Sprite):
@@ -131,11 +133,10 @@ class Terrorist(Human):
             else:
                 self.aimed = None
         can_see = self.see()
-        shoot = True
         min_turn = HUMAN_TURN
         for person in can_see:
-            to_turn = abs(person["phi"]-self.front)
-            if to_turn < min_turn:
+            to_turn = person["phi"]-self.front
+            if abs(to_turn) < min_turn:
                 min_turn = to_turn
                 self.aimed = person["person"]
         self.rotate(min_turn)
@@ -147,34 +148,48 @@ class Terrorist(Human):
                 obstacle.loc.z-self.loc.z,
                 obstacle.loc.x-self.loc.x
             )
-            dist = math.sqrt(
-                (obstacle.loc.z-self.loc.z)**2+\
-                (obstacle.loc.x-self.loc.x)**2
-            )
-            if phi >= self.front-SIGHT_RANGE and phi <= self.front+SIGHT_RANGE:
-                in_range_obs.append((obstacle, phi, dist))
+            if in_range(phi, self.front-SIGHT_RANGE, self.front+SIGHT_RANGE):
+                in_range_obs.append(obstacle)
         good_people = self.game.civilians.sprites() + [self.game.player]
         can_see = []
         for person in good_people:
-            phi_p = math.atan2(
+            phi = math.atan2(
                 person.loc.z-self.loc.z,
                 person.loc.x-self.loc.x
             )
-            dist_p = math.sqrt(
-                (person.loc.z-self.loc.z)**2+\
-                (person.loc.x-self.loc.x)**2
-            )
-            if phi_p >= self.front-SIGHT_RANGE and phi_p <= self.front+SIGHT_RANGE:
+            self_pos = (self.loc.x, self.loc.z)
+            person_pos = (person.loc.x, person.loc.z)
+            if in_range(phi, self.front-SIGHT_RANGE, self.front+SIGHT_RANGE):
                 person_visible = True
-                for obstacle, phi_o, dist_o in in_range_obs:
-                    person_visible &= not(math.isclose(phi_p, phi_o, rel_tol=0.05) and dist_o < dist_p)
+                for obstacle in in_range_obs:
+                    intersect_left = lines_intersect(
+                        self_pos,
+                        person_pos,
+                        obstacle.rect.topleft,
+                        obstacle.rect.bottomleft
+                    )
+                    intersect_right = lines_intersect(
+                        self_pos,
+                        person_pos,
+                        obstacle.rect.topright,
+                        obstacle.rect.bottomright
+                    )
+                    intersect_top = lines_intersect(
+                        self_pos,
+                        person_pos,
+                        obstacle.rect.topleft,
+                        obstacle.rect.topright
+                    )
+                    if intersect_left or intersect_right or intersect_top:
+                        person_visible = False
+                        break
                 if person_visible:
-                    can_see.append({"person": person, "phi": phi_p, "dist": dist_p})
+                    can_see.append({"person": person, "phi": phi})
         return can_see
 
     def shoot(self):
         bullet_x = self.rect.centerx + (TILESIZE//2 * math.cos(self.front))
-        bullet_z= self.rect.centery + (TILESIZE//2 * math.sin(self.front))
+        bullet_z = self.rect.centery + (TILESIZE//2 * math.sin(self.front))
         Bullet(self.game, self.front, bullet_x, bullet_z)
         self.shoot_count = 0
 

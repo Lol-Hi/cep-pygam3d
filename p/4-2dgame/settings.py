@@ -18,7 +18,7 @@ PURPLE = (128, 0, 128)
 WIDTH = 750
 HEIGHT = 750
 TILESIZE = 15
-FPS = 60
+FPS = 600
 TITLE = "Run, Hide, Tell!"
 
 # Human settings
@@ -27,7 +27,7 @@ SIGHT_RANGE = math.pi/3
 HUMAN_TURN = math.pi/300
 
 # Player settings
-PLAYER_SPEED = 200
+PLAYER_SPEED = 100
 
 # Terrorist settings
 SHOOT_INTERVAL = 5
@@ -35,7 +35,7 @@ SHOOT_INTERVAL = 5
 # Bullet settings
 BULLET_WIDTH = 2
 BULLET_HEIGHT = 2
-BULLET_SPEED = 500
+BULLET_SPEED = 200
 
 # Obstacle settings
 
