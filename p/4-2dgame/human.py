@@ -5,14 +5,14 @@ from bullet import *
 import math
 
 class Human(pg.sprite.Sprite):
-    def __init__(self, game, x, y):
+    def __init__(self, game, x, y, z):
         self.groups = game.all_sprites
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.image = self.drawImage()
         self.rect = self.image.get_rect()
-        self.loc = pg.math.Vector2(x*TILESIZE, y*TILESIZE)
-        self.vx, self.vy = 0, 0
+        self.loc = pg.math.Vector3(x*TILESIZE, y, z*TILESIZE)
+        self.vx, self.vz = 0, 0
         self.front = 0
 
     def drawImage(self):
@@ -24,11 +24,11 @@ class Human(pg.sprite.Sprite):
     def update(self):
         self.ai_update()
         self.loc.x += self.vx * self.game.dt
-        self.loc.y += self.vy * self.game.dt
+        self.loc.z += self.vz * self.game.dt
         self.rect.x = self.loc.x
         hit_x = self.collision_check('x')
-        self.rect.y = self.loc.y
-        hit_y = self.collision_check('y')
+        self.rect.y = self.loc.z
+        hit_z = self.collision_check('z')
 
 
     def collision_check(self, dir):
@@ -42,15 +42,15 @@ class Human(pg.sprite.Sprite):
                 self.vx = 0
                 self.rect.x = self.loc.x
             return hits
-        if dir == 'y':
+        if dir == 'z':
             hits = pg.sprite.spritecollide(self, self.game.obstacles, False)
             if hits:
-                if self.vy > 0:
-                    self.loc.y = hits[0].rect.top - self.rect.height
-                if self.vy < 0:
-                    self.loc.y = hits[0].rect.bottom
-                self.vy = 0
-                self.rect.y = self.loc.y
+                if self.vz > 0:
+                    self.loc.z = hits[0].rect.top - self.rect.height
+                if self.vz < 0:
+                    self.loc.z = hits[0].rect.bottom
+                self.vz = 0
+                self.rect.y = self.loc.z
             return hits
 
     def rotate(self, theta):
@@ -74,22 +74,22 @@ class Player(Human):
         return player
 
     def get_keys(self):
-        self.vx, self.vy = 0, 0
+        self.vx, self.vz = 0, 0
         direction = self.front
         keys = pg.key.get_pressed()
         if keys[pg.K_LEFT] or keys[pg.K_a]:
             direction -= math.pi/2
-            self.vx, self.vy = PLAYER_SPEED, PLAYER_SPEED
+            self.vx, self.vz = PLAYER_SPEED, PLAYER_SPEED
         if keys[pg.K_RIGHT] or keys[pg.K_d]:
             direction += math.pi/2
-            self.vx, self.vy = PLAYER_SPEED, PLAYER_SPEED
+            self.vx, self.vz= PLAYER_SPEED, PLAYER_SPEED
         if keys[pg.K_UP] or keys[pg.K_w]:
-            self.vx, self.vy = PLAYER_SPEED, PLAYER_SPEED
+            self.vx, self.vz= PLAYER_SPEED, PLAYER_SPEED
         if keys[pg.K_DOWN] or keys[pg.K_s]:
             direction += math.pi
-            self.vx, self.vy = PLAYER_SPEED, PLAYER_SPEED
+            self.vx, self.vz= PLAYER_SPEED, PLAYER_SPEED
         self.vx *= math.cos(direction)
-        self.vy *= math.sin(direction)
+        self.vz*= math.sin(direction)
 
     def get_mousepos(self):
         if pg.mouse.get_pressed()[0]:
@@ -102,8 +102,8 @@ class Player(Human):
         super().update()
 
 class Terrorist(Human):
-    def __init__(self, game, x, y):
-        super().__init__(game, x, y)
+    def __init__(self, game, x, y, z):
+        super().__init__(game, x, y, z)
         self.shoot_count = 0
         self.aimed = None
 
@@ -144,11 +144,11 @@ class Terrorist(Human):
         in_range_obs = []
         for obstacle in self.game.obstacles.sprites():
             phi = math.atan2(
-                obstacle.loc.y-self.loc.y,
+                obstacle.loc.z-self.loc.z,
                 obstacle.loc.x-self.loc.x
             )
             dist = math.sqrt(
-                (obstacle.loc.y-self.loc.y)**2+\
+                (obstacle.loc.z-self.loc.z)**2+\
                 (obstacle.loc.x-self.loc.x)**2
             )
             if phi >= self.front-SIGHT_RANGE and phi <= self.front+SIGHT_RANGE:
@@ -157,11 +157,11 @@ class Terrorist(Human):
         can_see = []
         for person in good_people:
             phi_p = math.atan2(
-                person.loc.y-self.loc.y,
+                person.loc.z-self.loc.z,
                 person.loc.x-self.loc.x
             )
             dist_p = math.sqrt(
-                (person.loc.y-self.loc.y)**2+\
+                (person.loc.z-self.loc.z)**2+\
                 (person.loc.x-self.loc.x)**2
             )
             if phi_p >= self.front-SIGHT_RANGE and phi_p <= self.front+SIGHT_RANGE:
@@ -174,13 +174,13 @@ class Terrorist(Human):
 
     def shoot(self):
         bullet_x = self.rect.centerx + (TILESIZE//2 * math.cos(self.front))
-        bullet_y = self.rect.centery + (TILESIZE//2 * math.sin(self.front))
-        Bullet(self.game, self.front, bullet_x, bullet_y)
+        bullet_z= self.rect.centery + (TILESIZE//2 * math.sin(self.front))
+        Bullet(self.game, self.front, bullet_x, bullet_z)
         self.shoot_count = 0
 
 class Civilian(Human):
-    def __init__(self, game, x, y):
-        super().__init__(game, x, y)
+    def __init__(self, game, x, y, z):
+        super().__init__(game, x, y, z)
         self.add(self.game.civilians)
 
     def drawImage(self):
