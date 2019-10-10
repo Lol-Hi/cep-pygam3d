@@ -104,9 +104,58 @@ class Player(Human):
         self.get_keys()
         super().update()
 
+    def see(self):
+        visible_obs = []
+        for obstacle in self.game.obstacles.sprites():
+            signed_dist_x = obstacle.loc.x-self.loc.x
+            signed_dist_z = obstacle.loc.z-self.loc.z
+            phi = math.atan2(
+                signed_dist_z,
+                signed_dist_x
+            )
+            if in_range(phi, self.front-SIGHT_RANGE, self.front+SIGHT_RANGE):
+                visible_obs.append(obstacle)
+        humans = self.game.civilians.sprites() + self.game.terrorists.sprites()
+        visible_humans = []
+        for person in humans:
+            phi = math.atan2(
+                person.loc.z-self.loc.z,
+                person.loc.x-self.loc.x
+            )
+            self_pos = (self.loc.x, self.loc.z)
+            person_pos = (person.loc.x, person.loc.z)
+            dist_person = distance(self_pos, person_pos)
+            person_visible = True
+            for obstacle in visible_obs:
+                intersect_diag1 = lines_intersect(
+                    self_pos,
+                    person_pos,
+                    obstacle.rect.topleft,
+                    obstacle.rect.bottomright
+                )
+                intersect_diag2 = lines_intersect(
+                    self_pos,
+                    person_pos,
+                    obstacle.rect.topright,
+                    obstacle.rect.bottomleft
+                )
+                if intersect_diag1 or intersect_diag2:
+                    person_visible = False
+                    #print(self_pos, person_pos, "blocked by {}".format(obstacle.loc))
+                    break
+            if not in_range(phi, self.front-SIGHT_RANGE, self.front+SIGHT_RANGE):
+                if dist_person > SIGHT_RADIUS:
+                    #print(self_pos, person_pos, "too far – {}".format(dist_person))
+                    continue
+            if person_visible:
+                visible_humans.append(person)
+        return visible_obs + visible_humans
+
+
 class Terrorist(Human):
     def __init__(self, game, x, y, z):
         super().__init__(game, x, y, z)
+        self.add(self.game.terrorists)
         self.shoot_count = 0
         self.action_count = 0
         self.move = True
@@ -264,7 +313,3 @@ class Civilian(Human):
         collision = super().update()
         if collision:
             self.rotate(random.uniform(-math.pi, math.pi))
-        pass
-
-    def ai_update(self):
-        pass

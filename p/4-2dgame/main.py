@@ -21,6 +21,7 @@ class Game:
 
     def new(self):
         self.all_sprites = pg.sprite.Group()
+        self.terrorists = pg.sprite.Group()
         self.civilians = pg.sprite.Group()
         self.obstacles = pg.sprite.Group()
         # #testing only
@@ -62,6 +63,7 @@ class Game:
 
     def update(self):
         self.all_sprites.update()
+        self.playing = self.player.alive()
 
     def events(self):
         for event in pg.event.get():
@@ -78,7 +80,8 @@ class Game:
 
     def end(self):
         self.all_sprites.empty()
-        self.humans.empty()
+        self.terrorists.empty()
+        self.civilians.empty()
         self.obstacles.empty()
 
     def quit(self):
