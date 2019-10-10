@@ -9,6 +9,8 @@ class Obstacle(pg.sprite.Sprite):
         self.image = self.drawImage()
         self.rect = self.image.get_rect()
         self.loc = pg.math.Vector3(x*TILESIZE, y, z*TILESIZE)
+        self.rect.x = self.loc.x
+        self.rect.y = self.loc.z
 
     def drawImage(self):
         obstacle = pg.Surface((TILESIZE, TILESIZE))
@@ -21,3 +23,7 @@ class Obstacle(pg.sprite.Sprite):
 
     def draw(self, screen):
         screen.draw(self.image, self.rect)
+
+    def draw_mark(self):
+        pg.draw.line(self.game.screen, BLACK, self.rect.topleft, self.rect.bottomright, 10)
+        pg.draw.line(self.game.screen, BLACK, self.rect.topleft, self.rect.bottomright, 10)

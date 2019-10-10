@@ -29,8 +29,11 @@ HUMAN_TURN = math.pi/300
 # Player settings
 PLAYER_SPEED = 100
 
-# Terrorist settings
+# NPC settings
 SHOOT_INTERVAL = 5
+MAX_SHOOT_TIME = 25
+TERRORIST_ACTIONS = ["move", "move", "move", "left", "right", "right", "left"]
+NPC_SPEED = 75
 
 # Bullet settings
 BULLET_WIDTH = 2
