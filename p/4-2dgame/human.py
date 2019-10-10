@@ -81,33 +81,39 @@ class Player(Human):
         pg.draw.circle(player, RED, (TILESIZE//2, TILESIZE//2), TILESIZE//2)
         return player
 
-    def get_keys(self):
+    def get_movement(self):
         self.vx, self.vz = 0, 0
         direction = self.front
         keys = pg.key.get_pressed()
-        if keys[pg.K_LEFT] or keys[pg.K_a]:
+        if keys[pg.K_a]:
             direction -= math.pi/2
             self.vx, self.vz = PLAYER_SPEED, PLAYER_SPEED
-        if keys[pg.K_RIGHT] or keys[pg.K_d]:
+        if keys[pg.K_d]:
             direction += math.pi/2
             self.vx, self.vz= PLAYER_SPEED, PLAYER_SPEED
-        if keys[pg.K_UP] or keys[pg.K_w]:
+        if keys[pg.K_w]:
             self.vx, self.vz= PLAYER_SPEED, PLAYER_SPEED
-        if keys[pg.K_DOWN] or keys[pg.K_s]:
+        if keys[pg.K_s]:
             direction += math.pi
             self.vx, self.vz= PLAYER_SPEED, PLAYER_SPEED
-        if keys[pg.K_e]:
-            self.calling = True
         self.vx *= math.cos(direction)
         self.vz *= math.sin(direction)
 
-    def get_mousepos(self):
-        if pg.mouse.get_pressed()[0]:
-            movement = pg.mouse.get_rel()[0]
-            self.front += movement*HUMAN_TURN
+    def get_direction(self):
+        keys = pg.key.get_pressed()
+        if keys[pg.K_LEFT]:
+            self.rotate(PLAYER_TURN)
+        if keys[pg.K_RIGHT]:
+            self.rotate(-PLAYER_TURN)
+
+    def check_calling(self):
+        keys = pg.key.get_pressed()
+        if keys[pg.K_e]:
+            self.calling = True
 
     def update(self):
-        self.get_mousepos()
+        self.get_direction()
+        self.check_calling()
         if self.calling:
             self.call_counter += 1
             #print("calling...", self.call_counter)
@@ -115,7 +121,7 @@ class Player(Human):
                 self.calling = False
                 self.game.start_countdown = True
         else:
-            self.get_keys()
+            self.get_movement()
             super().update()
 
     def see(self):
