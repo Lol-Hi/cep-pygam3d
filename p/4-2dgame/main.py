@@ -2,6 +2,9 @@ import pygame as pg
 import sys
 import os
 
+import random
+import math
+
 from settings import *
 from human import *
 from obstacle import *

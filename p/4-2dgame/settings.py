@@ -24,21 +24,22 @@ TITLE = "Run, Hide, Tell!"
 # Human settings
 HUMAN_HEIGHT = 5
 SIGHT_RANGE = math.pi/3
+SIGHT_RADIUS = 50
 HUMAN_TURN = math.pi/300
 
 # Player settings
 PLAYER_SPEED = 100
 
 # NPC settings
-SHOOT_INTERVAL = 5
+SHOOT_INTERVAL = 2
 MAX_SHOOT_TIME = 25
-TERRORIST_ACTIONS = ["move", "move", "move", "left", "right", "right", "left"]
+#TERRORIST_ACTIONS = ["move", "move", "move", "left", "right", "right", "left"]
 NPC_SPEED = 75
 
 # Bullet settings
 BULLET_WIDTH = 2
 BULLET_HEIGHT = 2
-BULLET_SPEED = 200
+BULLET_SPEED = 150
 
 # Obstacle settings
 

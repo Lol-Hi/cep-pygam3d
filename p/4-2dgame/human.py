@@ -35,8 +35,6 @@ class Human(pg.sprite.Sprite):
 
     def collision_check(self, dir):
         hits = pg.sprite.spritecollide(self, self.game.obstacles, False)
-        # hits.extend(pg.sprite.spritecollide(self, self.game.civilians, False))
-        # hits.append(pg.sprite.collide_rect(self, self.game.player))
         if hits:
             if dir == 'x':
                 if self.vx > 0:
@@ -65,9 +63,9 @@ class Human(pg.sprite.Sprite):
     def draw(self, screen):
         screen.blit(self.image, self.rect)
 
-    def draw_mark(self):
-        pg.draw.line(self.game.screen, BLACK, self.rect.topleft, self.rect.bottomright, 10)
-        pg.draw.line(self.game.screen, BLACK, self.rect.topleft, self.rect.bottomright, 10)
+    # def draw_mark(self):
+    #     pg.draw.line(self.game.screen, BLACK, self.rect.topleft, self.rect.bottomright, 10)
+    #     pg.draw.line(self.game.screen, BLACK, self.rect.topleft, self.rect.bottomright, 10)
 
 
 class Player(Human):
@@ -111,7 +109,8 @@ class Terrorist(Human):
         super().__init__(game, x, y, z)
         self.shoot_count = 0
         self.action_count = 0
-        self.aimed = None
+        self.move = True
+        self.front = random.choice([-math.pi/2, 0, math.pi/2, math.pi])
 
     def drawImage(self):
         terrorist = pg.Surface((TILESIZE, TILESIZE))
@@ -121,69 +120,78 @@ class Terrorist(Human):
         return terrorist
 
     def update(self):
-        # shooting = self.search_aim()
-        # if shooting:
-        #     return
-        # self.vx = math.cos(self.front) * NPC_SPEED
-        # self.vz = math.sin(self.front) * NPC_SPEED
-        # collision = super().update()
-        # if collision:
-        #     self.rotate(random.uniform(-math.pi, math.pi))
-
-        action = TERRORIST_ACTIONS[self.action_count%len(TERRORIST_ACTIONS)]
-        self.action_count += 1
-        shooting = self.search_aim()
-        if shooting:
-            self.action_count = 0
-            print(self.loc, self.aimed["pos"], self.shoot_count)
-            return
-        else:
+        self.search_aim()
+        if self.move:
             self.vx = math.cos(self.front) * NPC_SPEED
             self.vz = math.sin(self.front) * NPC_SPEED
             collision = super().update()
             if collision:
-                self.rotate(random.choice([-math.pi/4, math.pi/4]))
-            if action == "left":
-                self.rotate(-SIGHT_RANGE)
-            if action == "right":
-                self.rotate(SIGHT_RANGE)
+                self.rotate(math.pi)
+
+        # action = TERRORIST_ACTIONS[self.action_count%len(TERRORIST_ACTIONS)]
+        # self.action_count += 1
+        # shooting = self.search_aim()
+        # if shooting:
+        #     self.action_count = 0
+        #     print(self.loc, target["pos"], self.shoot_count)
+        #     return
+        # else:
+        #     self.vx = math.cos(self.front) * NPC_SPEED
+        #     self.vz = math.sin(self.front) * NPC_SPEED
+        #     collision = super().update()
+        #     if collision:
+        #         self.rotate(random.choice([-math.pi/4, math.pi/4]))
+        #     if action == "left":
+        #         self.rotate(-SIGHT_RANGE)
+        #     if action == "right":
+        #         self.rotate(SIGHT_RANGE)
 
     def search_aim(self):
         can_see = self.see()
+        #print(self.loc, can_see)
         if len(can_see) == 0:
             #self.rotate(HUMAN_TURN)
+            self.move = True
             return None
-        #print(self.loc, self.aimed)
-        if self.aimed:
-            self.shoot_count += 1
-            if self.aimed["person"].alive() and self.shoot_count <= MAX_SHOOT_TIME:
-                #print(self.aimed.loc)
-                self.rotate(self.front-self.aimed["phi"])
-                if self.shoot_count%SHOOT_INTERVAL == 0:
-                    self.shoot()
-                return "shooting"
-            else:
-                self.shoot_count = 0
-                self.aimed = None
-                #self.rotate(HUMAN_TURN)
-                print(self.loc, "not shooting", self.aimed)
-                return None
-        # min_turn = HUMAN_TURN
-        # for person in can_see:
-        #     to_turn = self.front - person["phi"]
-        #     if abs(to_turn) < abs(min_turn):
-        #         min_turn = to_turn
-        #         self.aimed = person["person"]
-        # self.rotate(min_turn)
-        min_dist = WIDTH//4
+        #print(self.loc, target)
+        orig_front = self.front
+        # if target:
+        #     self.shoot_count += 1
+        #     if target["person"].alive() and self.shoot_count <= MAX_SHOOT_TIME:
+        #         #print(target.loc)
+        #         self.rotate(self.front-target["phi"])
+        #         if self.shoot_count%SHOOT_INTERVAL == 0:
+        #             self.shoot()
+        #         return "shooting"
+        #     else:
+        #         self.shoot_count = 0
+        #         target = None
+        #         #self.rotate(HUMAN_TURN)
+        #         print(self.loc, "not shooting", target)
+        #         return None
+
+        min_dist = WIDTH
         to_turn = 0
         for person in can_see:
             dist = distance((self.loc.x, self.loc.z), person["pos"])
             if dist < min_dist:
                 min_dist = dist
-                self.aimed = person
-                to_turn = self.front - person["phi"]
-        self.rotate(to_turn)
+                target = person
+        self.front = target["phi"]
+        self.shoot_count += 1
+        if target["person"].alive() and self.shoot_count <= MAX_SHOOT_TIME:
+            #print(self.loc, target["pos"])
+            self.rotate(self.front-target["phi"])
+            if self.shoot_count%SHOOT_INTERVAL == 0:
+                self.shoot()
+                self.move = False
+        else:
+            self.shoot_count = 0
+            target = None
+            self.move = True
+            #self.rotate(HUMAN_TURN)
+            #print(self.loc, "not shooting", target)
+        self.front = orig_front
 
     def see(self):
         in_range_obs = []
@@ -196,6 +204,7 @@ class Terrorist(Human):
                 in_range_obs.append(obstacle)
         good_people = self.game.civilians.sprites() + [self.game.player]
         can_see = []
+        #print(self.loc, good_people)
         for person in good_people:
             phi = math.atan2(
                 person.loc.z-self.loc.z,
@@ -203,26 +212,31 @@ class Terrorist(Human):
             )
             self_pos = (self.loc.x, self.loc.z)
             person_pos = (person.loc.x, person.loc.z)
-            if in_range(phi, self.front-SIGHT_RANGE, self.front+SIGHT_RANGE):
-                person_visible = True
-                for obstacle in in_range_obs:
-                    intersect_diag1 = lines_intersect(
-                        self_pos,
-                        person_pos,
-                        obstacle.rect.topleft,
-                        obstacle.rect.bottomright
-                    )
-                    intersect_diag2 = lines_intersect(
-                        self_pos,
-                        person_pos,
-                        obstacle.rect.topright,
-                        obstacle.rect.bottomleft
-                    )
-                    if intersect_diag1 or intersect_diag2:
-                        person_visible = False
-                        break
-                if person_visible:
-                    can_see.append({"person": person, "phi": phi, "pos": person_pos})
+            dist_person = distance(self_pos, person_pos)
+            person_visible = True
+            for obstacle in in_range_obs:
+                intersect_diag1 = lines_intersect(
+                    self_pos,
+                    person_pos,
+                    obstacle.rect.topleft,
+                    obstacle.rect.bottomright
+                )
+                intersect_diag2 = lines_intersect(
+                    self_pos,
+                    person_pos,
+                    obstacle.rect.topright,
+                    obstacle.rect.bottomleft
+                )
+                if intersect_diag1 or intersect_diag2:
+                    person_visible = False
+                    #print(self_pos, person_pos, "blocked by {}".format(obstacle.loc))
+                    break
+            if not in_range(phi, self.front-SIGHT_RANGE, self.front+SIGHT_RANGE):
+                if dist_person > SIGHT_RADIUS:
+                    #print(self_pos, person_pos, "too far – {}".format(dist_person))
+                    continue
+            if person_visible:
+                can_see.append({"person": person, "phi": phi, "pos": person_pos})
         return can_see
 
     def shoot(self):
@@ -235,6 +249,7 @@ class Civilian(Human):
     def __init__(self, game, x, y, z):
         super().__init__(game, x, y, z)
         self.add(self.game.civilians)
+        self.front = random.uniform(-math.pi, math.pi)
 
     def drawImage(self):
         civilian = pg.Surface((TILESIZE, TILESIZE))
@@ -244,11 +259,11 @@ class Civilian(Human):
         return civilian
 
     def update(self):
-        # self.vx = math.cos(self.front) * NPC_SPEED
-        # self.vz = math.sin(self.front) * NPC_SPEED
+        self.vx = math.cos(self.front) * NPC_SPEED
+        self.vz = math.sin(self.front) * NPC_SPEED
         collision = super().update()
-        # if collision:
-        #     self.rotate(random.uniform(-math.pi, math.pi))
+        if collision:
+            self.rotate(random.uniform(-math.pi, math.pi))
         pass
 
     def ai_update(self):

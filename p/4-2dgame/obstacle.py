@@ -24,6 +24,6 @@ class Obstacle(pg.sprite.Sprite):
     def draw(self, screen):
         screen.draw(self.image, self.rect)
 
-    def draw_mark(self):
-        pg.draw.line(self.game.screen, BLACK, self.rect.topleft, self.rect.bottomright, 10)
-        pg.draw.line(self.game.screen, BLACK, self.rect.topleft, self.rect.bottomright, 10)
+    # def draw_mark(self):
+    #     pg.draw.line(self.game.screen, BLACK, self.rect.topleft, self.rect.bottomright, 10)
+    #     pg.draw.line(self.game.screen, BLACK, self.rect.topleft, self.rect.bottomright, 10)
