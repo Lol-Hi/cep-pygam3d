@@ -20,15 +20,17 @@ HEIGHT = 750
 TILESIZE = 15
 FPS = 600
 TITLE = "Run, Hide, Tell!"
+COUNTDOWN_TIME = 60*1000/FPS
 
 # Human settings
 HUMAN_HEIGHT = 5
-SIGHT_RANGE = math.pi/3
+SIGHT_RANGE = 5*math.pi/12
 SIGHT_RADIUS = 50
 HUMAN_TURN = math.pi/300
 
 # Player settings
 PLAYER_SPEED = 100
+CALL_TIME = 15*1000/FPS
 
 # NPC settings
 SHOOT_INTERVAL = 2

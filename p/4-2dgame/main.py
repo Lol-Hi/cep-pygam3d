@@ -17,9 +17,9 @@ class Game:
         pg.display.set_caption(TITLE)
         self.clock = pg.time.Clock()
         pg.key.set_repeat(500, 100)
-        self.level = "sample" #for testing purposes, will change later
 
     def new(self):
+        self.level = "sample" #for testing purposes, will change later
         self.all_sprites = pg.sprite.Group()
         self.terrorists = pg.sprite.Group()
         self.civilians = pg.sprite.Group()
@@ -33,6 +33,8 @@ class Game:
         # Civilian(self, 9, HUMAN_HEIGHT, 2)
         # Civilian(self, 13, HUMAN_HEIGHT, 11)
         self.mapreader()
+        self.start_countdown = False
+        self.countdown = 0
 
 
     def mapreader(self):
@@ -53,6 +55,7 @@ class Game:
                         Obstacle(self, row, WALL_HEIGHT, col)
 
     def run(self):
+        self.start()
         self.playing = True
         while self.playing:
             self.dt = self.clock.tick(FPS) / 1000
@@ -63,7 +66,15 @@ class Game:
 
     def update(self):
         self.all_sprites.update()
-        self.playing = self.player.alive()
+        if not(self.player.alive()):
+            self.playing = False
+            self.win = False
+        if self.start_countdown:
+            self.countdown += 1
+            #print("waiting...", self.countdown)
+        if self.countdown > COUNTDOWN_TIME:
+            self.playing = False
+            self.win = True
 
     def events(self):
         for event in pg.event.get():
@@ -77,6 +88,9 @@ class Game:
         self.screen.fill(WHITE)
         self.all_sprites.draw(self.screen)
         pg.display.flip()
+
+    def start(self):
+        pass
 
     def end(self):
         self.all_sprites.empty()

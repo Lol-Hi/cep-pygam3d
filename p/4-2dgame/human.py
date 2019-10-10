@@ -69,6 +69,11 @@ class Human(pg.sprite.Sprite):
 
 
 class Player(Human):
+    def __init__(self, game, x, y, z):
+        super().__init__(game, x, y, z)
+        self.calling = False
+        self.call_counter = 0
+
     def drawImage(self):
         player = pg.Surface((TILESIZE, TILESIZE))
         player.fill(WHITE)
@@ -91,6 +96,8 @@ class Player(Human):
         if keys[pg.K_DOWN] or keys[pg.K_s]:
             direction += math.pi
             self.vx, self.vz= PLAYER_SPEED, PLAYER_SPEED
+        if keys[pg.K_e]:
+            self.calling = True
         self.vx *= math.cos(direction)
         self.vz *= math.sin(direction)
 
@@ -101,8 +108,15 @@ class Player(Human):
 
     def update(self):
         self.get_mousepos()
-        self.get_keys()
-        super().update()
+        if self.calling:
+            self.call_counter += 1
+            #print("calling...", self.call_counter)
+            if self.call_counter >= CALL_TIME:
+                self.calling = False
+                self.game.start_countdown = True
+        else:
+            self.get_keys()
+            super().update()
 
     def see(self):
         visible_obs = []
