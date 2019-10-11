@@ -1,10 +1,10 @@
-import pygame
+import pg
 import random
 import datetime
 
 from settings import *
 
-pygame.init()
+pg.init()
 
 MAPMAKER_WIDTH = 720
 MAPMAKER_HEIGHT = 640
@@ -19,14 +19,14 @@ class Square:
         self.x = x
         self.y = y
         self.pos = (x * MAPMAKER_TILESIZE, y * MAPMAKER_TILESIZE)  # * MAPMAKER_TILESIZE
-        self.rect = pygame.Rect(self.pos, (MAPMAKER_TILESIZE, MAPMAKER_TILESIZE))
+        self.rect = pg.Rect(self.pos, (MAPMAKER_TILESIZE, MAPMAKER_TILESIZE))
         self.colour = (0, 0, 0)
 
     def draw(self, screen):
-        rectSurface = pygame.Surface((MAPMAKER_TILESIZE, MAPMAKER_TILESIZE))
+        rectSurface = pg.Surface((MAPMAKER_TILESIZE, MAPMAKER_TILESIZE))
         rectSurface.fill(PURPLE)
         rectSurface.set_colorkey(PURPLE)
-        pygame.draw.rect(screen, self.colour, self.rect, 1)
+        pg.draw.rect(screen, self.colour, self.rect, 1)
         # image = rectSurface.convert()
         # print(image)
         # print(self.rect)
@@ -53,18 +53,18 @@ class Info:
     def __init__(self, y, colour):
         self.y = y
         self.pos = (size[0] - MAPMAKER_TILESIZE, y * MAPMAKER_TILESIZE)
-        self.rect = pygame.Rect(self.pos, (MAPMAKER_TILESIZE, MAPMAKER_TILESIZE))
+        self.rect = pg.Rect(self.pos, (MAPMAKER_TILESIZE, MAPMAKER_TILESIZE))
         self.selected = False
         self.realcolour = colour
 
     def draw(self, screen):
-        rectSurface = pygame.Surface((MAPMAKER_TILESIZE, MAPMAKER_TILESIZE))
+        rectSurface = pg.Surface((MAPMAKER_TILESIZE, MAPMAKER_TILESIZE))
         rectSurface.fill(PURPLE)
         rectSurface.set_colorkey(PURPLE)
         if self.selected:
-            pygame.draw.rect(screen, self.realcolour, self.rect)
+            pg.draw.rect(screen, self.realcolour, self.rect)
         else:
-            pygame.draw.rect(screen, (0, 0, 0), self.rect, 1)
+            pg.draw.rect(screen, (0, 0, 0), self.rect, 1)
 
     def change(self, infoselected):
         self.selected = not self.selected
@@ -90,13 +90,13 @@ def export():
                 f.write(str(sqtype) + ",")
 
 
-screen = pygame.display.set_mode(size)
+screen = pg.display.set_mode(size)
 
-pygame.display.set_caption("Mapmaker")
+pg.display.set_caption("Mapmaker")
 
 done = False
 
-clock = pygame.time.Clock()
+clock = pg.time.Clock()
 
 infos = []
 infokeys = ["0", "1", "2", "3", "4"]
@@ -105,7 +105,7 @@ infoselected = -1
 for y, infocolour in enumerate(infocolours):
     infos.append(Info(y, infocolour))
     infokeys[y] = "K_" + infokeys[y]
-    infokeys[y] = getattr(pygame, infokeys[y])
+    infokeys[y] = getattr(pg, infokeys[y])
 # infos[0].change()
 
 grid = []
@@ -117,17 +117,17 @@ for y in range(num[1]):
 lastchanged = (-1, -1)
 
 while not done:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
+    for event in pg.event.get():
+        if event.type == pg.QUIT:
             done = True
-        if event.type == pygame.MOUSEBUTTONDOWN:
+        if event.type == pg.MOUSEBUTTONDOWN:
             pos = event.pos
             lastchanged = Square.checkcollision(pos)
-        if event.type == pygame.MOUSEMOTION:
+        if event.type == pg.MOUSEMOTION:
             pos = event.pos
             if event.buttons[0]:
                 lastchanged = Square.checkcollision(pos, lastchanged)
-        if event.type == pygame.KEYDOWN:
+        if event.type == pg.KEYDOWN:
             infoselected = Info.checkkey(event.key, infoselected)
 
 
@@ -137,8 +137,8 @@ while not done:
             sq.draw(screen)
     for info in infos:
         info.draw(screen)
-    pygame.display.flip()
+    pg.display.flip()
     clock.tick(60)
 
 export()
-pygame.quit()
+pg.quit()
