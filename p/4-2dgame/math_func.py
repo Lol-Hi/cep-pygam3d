@@ -19,3 +19,12 @@ def distance(p1, p2):
     x1, y1 = p1
     x2, y2 = p2
     return math.sqrt((x1-x2)**2 + (y1-y2)**2)
+
+def signed_basic_angle(angle):
+    if in_range(angle, -math.pi/2, math.pi/2):
+        basic = angle
+    if in_range(angle, -math.pi, -math.pi/2) or angle > math.pi:
+        basic = abs(angle)-math.pi
+    if in_range(angle, math.pi/2, math.pi) or angle < -math.pi:
+        basic = math.pi-abs(angle)
+    return basic

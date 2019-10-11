@@ -31,11 +31,11 @@ SIGHT_RADIUS = 50
 PLAYER_TURN = math.pi/50
 PLAYER_SPEED = 100
 CALL_TIME = 15*1000/FPS
+HEARING_RADIUS = 100
 
 # NPC settings
 SHOOT_INTERVAL = 2
 MAX_SHOOT_TIME = 25
-#TERRORIST_ACTIONS = ["move", "move", "move", "left", "right", "right", "left"]
 NPC_SPEED = 75
 
 # Bullet settings

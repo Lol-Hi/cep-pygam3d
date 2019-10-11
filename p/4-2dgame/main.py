@@ -17,6 +17,14 @@ class Game:
         pg.display.set_caption(TITLE)
         self.clock = pg.time.Clock()
         pg.key.set_repeat(500, 100)
+        self.load_data()
+
+    def load_data(self):
+        self.game_folder = os.path.dirname(__file__)
+        self.assets_folder = os.path.join(self.game_folder, "assets")
+
+        self.footsteps = pg.mixer.Sound(os.path.join(self.assets_folder, "footsteps.wav"))
+        self.sound_channel = pg.mixer.Channel(0)
 
     def new(self):
         self.level = "sample" #for testing purposes, will change later

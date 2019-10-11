@@ -73,6 +73,7 @@ class Player(Human):
         super().__init__(game, x, y, z)
         self.calling = False
         self.call_counter = 0
+        self.hear_count = 0
 
     def drawImage(self):
         player = pg.Surface((TILESIZE, TILESIZE))
@@ -121,8 +122,12 @@ class Player(Human):
                 self.calling = False
                 self.game.start_countdown = True
         else:
+            self.hear_count += 1
+            if self.hear_count%3 == 0:
+                self.hear()
             self.get_movement()
             super().update()
+        #print([obj.loc for obj in self.see()])
 
     def see(self):
         visible_obs = []
@@ -170,6 +175,33 @@ class Player(Human):
             if person_visible:
                 visible_humans.append(person)
         return visible_obs + visible_humans
+
+    def hear(self):
+        l_vol, r_vol = 0, 0
+        total_vol = 0
+        t_nearby = 0
+        for t in self.game.terrorists.sprites():
+            t_dist = distance((self.loc.x, self.loc.z), (t.loc.x, t.loc.z))
+            t_phi = math.atan2(self.loc.z-t.loc.z, self.loc.x-t.loc.x)
+            if t_dist <= HEARING_RADIUS:
+                t_nearby += 1
+                alpha = signed_basic_angle(self.front-t_phi)
+                beta = math.pi/2-abs(alpha)
+                theta = math.asin(math.sin(beta)*(TILESIZE/2)/t_dist)
+                total_vol = 1-t_dist/HEARING_RADIUS if total_vol == 0 else (1-t_dist/HEARING_RADIUS+total_vol)/2
+                softer_vol = 2*(beta-theta)/math.pi
+                louder_vol = 2*(beta+theta)/math.pi
+                if alpha > 0:
+                    l_vol = softer_vol if l_vol == 0 else (l_vol+softer_vol)/2
+                    r_vol = louder_vol if r_vol == 0 else (r_vol+louder_vol)/2
+                else:
+                    l_vol = louder_vol if l_vol == 0 else (l_vol+softer_vol)/2
+                    r_vol = louder_vol if r_vol == 0 else (r_vol+softer_vol)/2
+        self.game.footsteps.set_volume(total_vol/2)
+        self.game.sound_channel.set_volume(l_vol, r_vol)
+        self.game.sound_channel.play(self.game.footsteps)
+        print(total_vol, l_vol, r_vol)
+
 
 
 class Terrorist(Human):
@@ -224,21 +256,6 @@ class Terrorist(Human):
             return None
         #print(self.loc, target)
         orig_front = self.front
-        # if target:
-        #     self.shoot_count += 1
-        #     if target["person"].alive() and self.shoot_count <= MAX_SHOOT_TIME:
-        #         #print(target.loc)
-        #         self.rotate(self.front-target["phi"])
-        #         if self.shoot_count%SHOOT_INTERVAL == 0:
-        #             self.shoot()
-        #         return "shooting"
-        #     else:
-        #         self.shoot_count = 0
-        #         target = None
-        #         #self.rotate(HUMAN_TURN)
-        #         print(self.loc, "not shooting", target)
-        #         return None
-
         min_dist = WIDTH
         to_turn = 0
         for person in can_see:
@@ -250,7 +267,6 @@ class Terrorist(Human):
         self.shoot_count += 1
         if target["person"].alive() and self.shoot_count <= MAX_SHOOT_TIME:
             #print(self.loc, target["pos"])
-            self.rotate(self.front-target["phi"])
             if self.shoot_count%SHOOT_INTERVAL == 0:
                 self.shoot()
                 self.move = False
