@@ -182,7 +182,7 @@ class Player(Human):
         visibles = sorted(visibles.items(), key=lambda kv: kv[1])
         for x, visible in enumerate(visibles):
             visibles[x] = visibles[x][0]
-        # visibles = list(reversed(visibles))
+        visibles = list(reversed(visibles))
         return visibles
 
     def hear(self):

@@ -84,7 +84,7 @@ class Game:
                     spz = sp.loc[2] / MAKER_TILESIZE * HUMAN_BODY_FRONTBACK
 
                     dist = math.floor(mf.distance((plx, plz), (spx, spz))) + 1
-                    brightness = min(100 / (dist**2), 1)
+                    brightness = min(100 / (dist**2) + 0.05, 1)
 
                     print("Dist" + str(dist))
 
@@ -102,7 +102,7 @@ class Game:
 
                     # print(corner1, corner2)
                     raw.cuboid(self.screen, corner1, corner2, self.player.state, "white", brightness)
-                    break
+                    # break
             pygame.display.flip()
             # quit(1)
             # os.system("pause")
