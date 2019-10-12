@@ -174,7 +174,10 @@ class Player(Human):
         for t in self.game.terrorists.sprites():
             t_dist = distance((self.loc.x, self.loc.z), (t.loc.x, t.loc.z))
             t_phi = math.atan2(self.loc.z-t.loc.z, self.loc.x-t.loc.x)
-            if t_dist <= HEARING_RADIUS:
+            if t_dist == 0:
+                total_vol = 1
+                l_vol, r_vol = 1, 1
+            elif t_dist <= HEARING_RADIUS:
                 t_nearby += 1
                 alpha = signed_basic_angle(self.front-t_phi)
                 beta = math.pi/2-abs(alpha)
@@ -188,10 +191,13 @@ class Player(Human):
                 else:
                     l_vol = louder_vol if l_vol == 0 else (l_vol+softer_vol)/2
                     r_vol = louder_vol if r_vol == 0 else (r_vol+softer_vol)/2
-        self.game.footsteps.set_volume(total_vol/2)
-        self.game.sound_channel.set_volume(l_vol, r_vol)
-        self.game.sound_channel.play(self.game.footsteps)
-        print(total_vol, l_vol, r_vol)
+        try:
+            self.game.footsteps.set_volume(total_vol/2)
+            self.game.sound_channel.set_volume(l_vol, r_vol)
+            self.game.sound_channel.play(self.game.footsteps)
+        except:
+            self.game.footsteps2.set_volume(total_vol/2)
+            self.game.footsteps2.play()
 
 
 
@@ -224,19 +230,22 @@ class Terrorist(Human):
         can_see = self.see()
         if len(can_see) == 0:
             self.move = True
-            return None
+            return
         orig_front = self.front
         min_dist = WIDTH
         to_turn = 0
+        person_seen = False
         for person in can_see:
             dist = distance((self.loc.x, self.loc.z), person["pos"])
             if dist < min_dist:
                 min_dist = dist
                 target = person
+                person_seen = True
+        if not(person_seen):
+            return
         self.front = target["phi"]
         self.shoot_count += 1
         if target["person"].alive() and self.shoot_count <= MAX_SHOOT_TIME:
-            #print(self.loc, target["pos"])
             if self.shoot_count%SHOOT_INTERVAL == 0:
                 self.shoot()
                 self.move = False
