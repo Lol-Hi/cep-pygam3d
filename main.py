@@ -7,6 +7,8 @@ import raw3d as raw
 import random
 import math
 
+import math_func as mf
+
 from settings import *
 from human import *
 from obstacle import *
@@ -70,16 +72,21 @@ class Game:
             self.dt = self.clock.tick(FPS) / 1000
             self.events()
             self.update()
-            plx = self.player.loc[0]
+            plx = self.player.loc[0] / MAKER_TILESIZE * HUMAN_BODY_FRONTBACK
             ply = self.player.loc[1]
-            plz = self.player.loc[2]
-            self.screen.fill(WHITE)
+            plz = self.player.loc[2] / MAKER_TILESIZE * HUMAN_BODY_FRONTBACK
+            self.screen.fill(BLACK)
             for sp in self.player.see():
                 # print(sp.spritetype)
                 if sp.spritetype == "Wall":
                     spx = sp.loc[0] / MAKER_TILESIZE * HUMAN_BODY_FRONTBACK
                     spy = sp.loc[1]
                     spz = sp.loc[2] / MAKER_TILESIZE * HUMAN_BODY_FRONTBACK
+
+                    dist = math.floor(mf.distance((plx, plz), (spx, spz))) + 1
+                    brightness = min(100 / (dist**2), 1)
+
+                    print("Dist" + str(dist))
 
                     spx1 = spx - WALL_WIDTH/2
                     spx2 = spx + WALL_WIDTH/2
@@ -93,10 +100,9 @@ class Game:
                     corner1 = (spx1, spy1, spz1)
                     corner2 = (spx2, spy2, spz2)
 
-                    print(corner1, corner2)
-                    raw.cuboid(self.screen, corner1, corner2, self.player.state, "black")
+                    # print(corner1, corner2)
+                    raw.cuboid(self.screen, corner1, corner2, self.player.state, "white", brightness)
                     break
-                # print("new")
             pygame.display.flip()
             # quit(1)
             # os.system("pause")
@@ -129,7 +135,7 @@ class Game:
 
     def draw(self):
         self.screen.fill(WHITE)
-        # self.all_sprites.draw(self.screen)
+        self.all_sprites.draw(self.screen)
         pygame.display.flip()
 
     def start(self):

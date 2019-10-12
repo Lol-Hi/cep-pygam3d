@@ -18,7 +18,7 @@ class Human(pygame.sprite.Sprite):
         self.rect.x = self.loc.x
         self.rect.y = self.loc.z
         self.vx, self.vz = 0, 0
-        self.front = -math.pi
+        self.front = 0
 
     def drawImage(self):
         pass
@@ -129,7 +129,8 @@ class Player(Human):
             super().update()
 
     def see(self):
-        visible_obs = []
+        # visible_obs = []
+        visible_obs = {}
         for obstacle in self.game.obstacles.sprites():
             signed_dist_x = obstacle.loc.x-self.loc.x
             signed_dist_z = obstacle.loc.z-self.loc.z
@@ -138,9 +139,11 @@ class Player(Human):
                 signed_dist_x
             )
             if in_range(phi, self.front-SIGHT_RANGE, self.front+SIGHT_RANGE):
-                visible_obs.append(obstacle)
+                # visible_obs.append(obstacle)
+                visible_obs[obstacle] = distance((self.loc.x, self.loc.z), (obstacle.loc.x, obstacle.loc.z))
         humans = self.game.civilians.sprites() + self.game.terrorists.sprites()
-        visible_humans = []
+        # visible_humans = []
+        visible_humans = {}
         for person in humans:
             phi = math.atan2(
                 person.loc.z-self.loc.z,
@@ -170,9 +173,17 @@ class Player(Human):
                 if dist_person > SIGHT_RADIUS:
                     continue
             if person_visible:
-                visible_humans.append(person)
-        print(visible_obs + visible_humans)
-        return visible_obs + visible_humans
+                # visible_humans.append(person)
+                visible_humans[obstacle] = distance((self.loc.x, self.loc.z), (person.loc.x, person.loc.z))
+        # print(visible_obs + visible_humans)
+        visibles = {}
+        visibles.update(visible_humans)
+        visibles.update(visible_obs)
+        visibles = sorted(visibles.items(), key=lambda kv: kv[1])
+        for x, visible in enumerate(visibles):
+            visibles[x] = visibles[x][0]
+        # visibles = list(reversed(visibles))
+        return visibles
 
     def hear(self):
         l_vol, r_vol = 0, 0

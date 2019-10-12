@@ -21,7 +21,7 @@ def getX(vector):
     pointY = 0
     pointZ = vector[2] - _eyeZ
 
-    print(pointX, pointY, pointZ)
+    # print(pointX, pointY, pointZ)
 
     extendX = pointX
     extendY = pointY
@@ -63,7 +63,7 @@ def getX(vector):
     #     translatedX *= -1
     # print(translatedX)
     # print(pointX)
-    print(angle)
+    # print(angle)
     return translatedX
 
 def getY(vector):

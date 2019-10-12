@@ -9,7 +9,7 @@ RED = (255, 0, 0)
 GRAY = (100, 100, 100)
 GREY = (180, 180, 180)
 
-def cuboid(screen, corner1, corner2, state, colorscheme):
+def cuboid(screen, corner1, corner2, state, colorscheme, brightness):
     # corner1 = (15, 3, 7)
     # corner2 = (18, 0, 2)
     lenX = corner1[0] - corner2[0]
@@ -150,6 +150,17 @@ def cuboid(screen, corner1, corner2, state, colorscheme):
     if colorscheme == "black":
         tblue = BLACK
         tgreen = BLACK
+
+    if colorscheme == "white":
+        tblue = WHITE
+        tgreen = WHITE
+        tblack = WHITE
+
+    tblue = tuple([brightness*x for x in tblue])
+    tgreen = tuple([brightness * x for x in tblue])
+    tblack = tuple([brightness * x for x in tblue])
+
+    # print(tblue)
 
     if posX == -1 and posY == -1:
         pygame.draw.polygon(screen, tblue, faceRight)
