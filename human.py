@@ -194,7 +194,7 @@ class Player(Human):
                     continue
             if person_visible:
                 # visible_humans.append(person)
-                visible_humans[obstacle] = distance((self.loc.x, self.loc.z), (person.loc.x, person.loc.z))
+                visible_humans[person] = distance((self.loc.x, self.loc.z), (person.loc.x, person.loc.z))
         # print(visible_obs + visible_humans)
         visibles = {}
         visibles.update(visible_humans)

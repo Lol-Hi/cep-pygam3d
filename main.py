@@ -115,7 +115,7 @@ class Game:
                     corner1 = (spx1, spy1, spz1)
                     corner2 = (spx2, spy2, spz2)
 
-                    # print(corner1, corner2)
+                    print(corner1, corner2)
                     raw.cuboid(self.screen, corner1, corner2, self.player.state, "white", brightness)
                     # break
             pygame.display.flip()
@@ -126,6 +126,11 @@ class Game:
             # for sp in self.player.see():
             #     if sp.spritetype == "Wall":
             #         sp.change(BLACK)
+            #         spx = sp.loc[0] / MAKER_TILESIZE * HUMAN_BODY_WIDTH
+            #         spy = sp.loc[1]
+            #         spz = sp.loc[2] / MAKER_TILESIZE * HUMAN_BODY_WIDTH
+            #         print(spx, spz)
+            #         break
             # self.draw()
 
 
