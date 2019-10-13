@@ -22,6 +22,7 @@ TILESIZE = 15
 FPS = 600
 TITLE = "Run, Hide, Tell!"
 MAX_COUNTDOWN_TIME = 30
+MAX_LEVEL = 5
 
 # Font sizes
 TITLE_FONTSIZE = 60

@@ -19,7 +19,7 @@ class Game:
         self.clock = pg.time.Clock()
         pg.key.set_repeat(500, 100)
         self.load_data()
-        self.level = "sample" #for testing purposes, will change later
+        self.level = 5
 
     def load_data(self):
         self.game_folder = os.path.dirname(__file__)
@@ -121,7 +121,7 @@ class Game:
             self.normal_font.render(police_text, True, WHITE),
             (PHONE_LEFT+SIDE_BEZEL+(PHONESCREEN_WIDTH-self.normal_font.size(police_text)[0])//2, HEIGHT-PHONESCREEN_HEIGHT+PHONESCREEN_PADDING)
         )
-        calling_text = "00:0{}".format(curr_calltime) if curr_calltime < 9 else "call ended"
+        calling_text = "00:0{}".format(curr_calltime) if curr_calltime < MAX_CALL_TIME-1 else "call ended"
         self.screen.blit(
             self.tiny_font.render(calling_text, True, WHITE),
             (PHONE_LEFT+SIDE_BEZEL+(PHONESCREEN_WIDTH-self.tiny_font.size(calling_text)[0])//2, HEIGHT-PHONESCREEN_HEIGHT+self.normal_linesize)
@@ -214,8 +214,14 @@ class Game:
         level_text = "Current level: {}".format(self.level)
         self.title_font.set_bold(True)
         if self.win:
-            self.screen.fill(WHITE)
-            win_text = "You Won!"
+            if self.level == MAX_LEVEL:
+                self.screen.fill(YELLOW)
+                win_text = "You completed all the levels!"
+                instruction = "Press <ENTER>/<RETURN> to restart"
+            else:
+                self.screen.fill(WHITE)
+                win_text = "You Won!"
+                instruction = "Press <ENTER>/<RETURN> to move on to the next level"
             self.screen.blit(
                 self.title_font.render(win_text, False, BLACK),
                 ((WIDTH-self.title_font.size(win_text)[0])//2, TITLE_BUFFER)
@@ -228,7 +234,6 @@ class Game:
                 self.normal_font.render(time_text, False, BLACK),
                 ((WIDTH-self.normal_font.size(time_text)[0])//2, 2*TITLE_BUFFER+self.normal_linesize)
             )
-            instruction = "Press <ENTER>/<RETURN> to move on to the next level"
             self.screen.blit(
                 self.normal_font.render(instruction, False, BLACK),
                 ((WIDTH-self.normal_font.size(instruction)[0])//2, HEIGHT-TITLE_BUFFER)
@@ -242,10 +247,15 @@ class Game:
                     if event.key == pg.K_ESCAPE:
                         self.quit()
                     if event.key == pg.K_RETURN:
+                        if self.level == MAX_LEVEL:
+                            self.level = 1
+                        else:
+                            self.level += 1
                         return
         else:
             self.screen.fill(BLACK)
             lose_text = "You Died"
+            instruction = "Press <ENTER>/<RETURN> to restart"
             self.screen.blit(
                 self.title_font.render(lose_text, False, WHITE),
                 ((WIDTH-self.title_font.size(lose_text)[0])//2, TITLE_BUFFER)
@@ -258,7 +268,6 @@ class Game:
                 self.normal_font.render(time_text, False, WHITE),
                 ((WIDTH-self.normal_font.size(time_text)[0])//2, 2*TITLE_BUFFER+self.normal_linesize)
             )
-            instruction = "Press <ENTER>/<RETURN> to restart"
             self.screen.blit(
                 self.normal_font.render(instruction, False, WHITE),
                 ((WIDTH-self.normal_font.size(instruction)[0])//2, HEIGHT-TITLE_BUFFER)
@@ -272,6 +281,7 @@ class Game:
                     if event.key == pg.K_ESCAPE:
                         self.quit()
                     if event.key == pg.K_RETURN:
+                        self.level = 1
                         return
         self.title_font.set_bold(True)
 
