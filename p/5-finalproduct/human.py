@@ -116,6 +116,7 @@ class Player(Human):
             call_time = pg.time.get_ticks()-self.call_start
             if call_time > MAX_CALL_TIME*1000:
                 self.calling = False
+                self.game.countdown_start = pg.time.get_ticks()
         else:
             self.hear_count += 1
             if self.hear_count%3 == 0:

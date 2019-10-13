@@ -26,8 +26,8 @@ class Game:
         self.assets_folder = os.path.join(self.game_folder, "assets")
 
         self.title_font = pg.font.Font(None, TITLE_FONTSIZE)
-        self.title_font.set_bold(True)
         self.normal_font = pg.font.Font(None, NORMAL_FONTSIZE)
+        self.tiny_font = pg.font.Font(None, TINY_FONTSIZE)
         self.normal_linesize = self.normal_font.get_linesize()+LINE_SPACING
 
         self.footsteps = pg.mixer.Sound(os.path.join(self.assets_folder, "footsteps.wav"))
@@ -42,6 +42,7 @@ class Game:
         self.obstacles = pg.sprite.Group()
         self.mapreader()
         self.countdown_start = 0
+        self.curr_countdown = 0
 
 
     def mapreader(self):
@@ -91,17 +92,47 @@ class Game:
     def draw(self):
         self.screen.fill(WHITE)
         self.all_sprites.draw(self.screen)
+        self.menu()
+        if self.player.calling:
+            self.phone()
         pg.display.flip()
 
     def menu(self):
-        pass
+        pg.draw.rect(self.screen, BLACK, [0, 0, WIDTH, MENU_HEIGHT])
+        level_text = "Level: {}".format(self.level)
+        self.screen.blit(
+            self.normal_font.render(level_text, True, WHITE),
+            (MENU_BUFFER, MENU_BUFFER)
+        )
+        if self.countdown_start:
+            countdown_text = "Time remaining: {}s".format(MAX_COUNTDOWN_TIME-self.curr_countdown//1000)
+            self.screen.blit(
+                self.normal_font.render(countdown_text, True, WHITE),
+                (WIDTH-self.normal_font.size(countdown_text)[0]-MENU_BUFFER, MENU_BUFFER)
+            )
+
+    def phone(self):
+        pg.draw.rect(self.screen, BLACK, [PHONE_LEFT, HEIGHT-PHONE_HEIGHT, PHONE_WIDTH, PHONE_HEIGHT])
+        pg.draw.rect(self.screen, WHITE, [PHONE_LEFT+SIDE_BEZEL, HEIGHT-PHONESCREEN_HEIGHT, PHONESCREEN_WIDTH, PHONESCREEN_HEIGHT])
+        police_text = "999"
+        self.screen.blit(
+            self.normal_font.render(police_text, True, BLACK),
+            (PHONE_LEFT+SIDE_BEZEL+(PHONESCREEN_WIDTH-self.normal_font.size(police_text)[0])//2, HEIGHT-PHONESCREEN_HEIGHT+PHONESCREEN_PADDING)
+        )
+        calling_text = "calling..."
+        self.screen.blit(
+            self.tiny_font.render(calling_text, True, BLACK),
+            (PHONE_LEFT+SIDE_BEZEL+(PHONESCREEN_WIDTH-self.tiny_font.size(calling_text)[0])//2, HEIGHT-PHONESCREEN_HEIGHT+self.normal_linesize)
+        )
 
     def start(self):
         self.screen.fill(LIGHTBLUE)
+        self.title_font.set_bold(True)
         self.screen.blit(
             self.title_font.render(TITLE, False, BLACK),
             ((WIDTH-self.title_font.size(TITLE)[0])//2, TITLE_BUFFER)
         )
+        self.title_font.set_bold(False)
         self.normal_font.set_underline(True)
         self.screen.blit(
             self.normal_font.render("Instructions", False, BLACK),
@@ -170,6 +201,7 @@ class Game:
         time_elapsed = (self.end_time-self.start_time)//1000
         time_text = "Time taken: {} min {} s".format(time_elapsed//60, time_elapsed%60)
         level_text = "Current level: {}".format(self.level)
+        self.title_font.set_bold(True)
         if self.win:
             self.screen.fill(WHITE)
             win_text = "You Won!"
@@ -230,6 +262,7 @@ class Game:
                         self.quit()
                     if event.key == pg.K_RETURN:
                         return
+        self.title_font.set_bold(True)
 
     def quit(self):
         pg.quit()
