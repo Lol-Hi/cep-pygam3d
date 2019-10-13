@@ -1,9 +1,0 @@
-3d rendering
-different models
-mapmaker + reader
-audio cues
-visual cues
-shooting
-civilians
-calling
-multiple levels
