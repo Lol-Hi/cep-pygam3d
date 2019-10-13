@@ -211,19 +211,19 @@ class Player(Human):
                 angle_diff = self.front - math.atan2(self.loc.z-t.loc.z, self.loc.x-t.loc.x)
                 if in_range(angle_diff, -math.pi/4, math.pi/4):
                     arrow_orientation = "down"
-                    arrow_x = WIDTH//2*(math.cos(angle_diff)+math.sin(angle_diff))
+                    arrow_x = WIDTH*(math.cos(angle_diff)+math.sin(angle_diff))
                     arrow_y = HEIGHT
-                elif in_range(angle_diff, math.pi/4, 3*math.pi/4):
+                if in_range(angle_diff, math.pi/4, 3*math.pi/4):
                     arrow_orientation = "right"
                     arrow_x = WIDTH
-                    arrow_y = HEIGHT//2*(math.sin(angle_diff)+math.cos(angle_diff))
-                elif in_range(angle_diff, -3*math.pi/4, -math.pi/4):
+                    arrow_y = HEIGHT*(math.cos(angle_diff)+math.sin(angle_diff))
+                if in_range(angle_diff, -3*math.pi/4, -math.pi/4):
                     arrow_orientation = "left"
                     arrow_x = 0
-                    arrow_y = HEIGHT//2*(math.sin(angle_diff)+math.cos(angle_diff))
-                else:
+                    arrow_y = HEIGHT*(math.cos(-angle_diff)+math.sin(-angle_diff))
+                if angle_diff < -3*math.pi/4 or angle_diff > 3*math.pi/4:
                     arrow_orientation = "up"
-                    arrow_x = WIDTH//2*(math.cos(angle_diff)+math.sin(angle_diff))
+                    arrow_x = -WIDTH*(math.cos(-angle_diff)+math.sin(-angle_diff))
                     arrow_y = MENU_HEIGHT
                 self.game.arrows.append([arrow_orientation, arrow_x, arrow_y])
 
