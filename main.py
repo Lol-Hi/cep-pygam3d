@@ -68,34 +68,48 @@ class Game:
     def run(self):
         self.playing = True
         # state = 1
+        bet._OGeyeX = self.player.loc[0] / MAKER_TILESIZE * HUMAN_BODY_WIDTH
+        bet._OGeyeZ = self.player.loc[2] / MAKER_TILESIZE * HUMAN_BODY_WIDTH
         while self.playing:
             self.dt = self.clock.tick(FPS) / 1000
             self.events()
             self.update()
-            plx = self.player.loc[0] / MAKER_TILESIZE * HUMAN_BODY_FRONTBACK
+            plx = self.player.loc[0] / MAKER_TILESIZE * HUMAN_BODY_WIDTH
             ply = self.player.loc[1]
-            plz = self.player.loc[2] / MAKER_TILESIZE * HUMAN_BODY_FRONTBACK
+            plz = self.player.loc[2] / MAKER_TILESIZE * HUMAN_BODY_WIDTH
             self.screen.fill(BLACK)
+
+            pygame.draw.polygon(self.screen, BLUE,
+                                [bet.Get((-10000, 0, -10000)), bet.Get((-10000, 0, 10000)), bet.Get((10000, 0, 10000)),
+                                 bet.Get((10000, 0, -10000))])
+            # pygame.draw.polygon(self.screen, BLUE,
+            #                     [bet.Get((-10000, 25, -10000)), bet.Get((-10000, 25, 10000)), bet.Get((10000, 25, 10000)),
+            #                      bet.Get((10000, 25, -10000))])
+
             for sp in self.player.see():
                 # print(sp.spritetype)
                 if sp.spritetype == "Wall":
-                    spx = sp.loc[0] / MAKER_TILESIZE * HUMAN_BODY_FRONTBACK
+                    print(sp.loc)
+                    spx = sp.loc[0] / MAKER_TILESIZE * HUMAN_BODY_WIDTH
                     spy = sp.loc[1]
-                    spz = sp.loc[2] / MAKER_TILESIZE * HUMAN_BODY_FRONTBACK
+                    spz = sp.loc[2] / MAKER_TILESIZE * HUMAN_BODY_WIDTH
+
+                    # print(plx, plz)
+                    # print(spx, spz)
 
                     dist = math.floor(mf.distance((plx, plz), (spx, spz))) + 1
-                    brightness = min(100 / (dist**2) + 0.05, 1)
+                    brightness = min(100 / (dist**2) + 0.1, 1)
 
-                    print("Dist" + str(dist))
+                    # print("Dist" + str(dist))
 
-                    spx1 = spx - WALL_WIDTH/2
-                    spx2 = spx + WALL_WIDTH/2
+                    spx1 = spx - WALL_FRONTBACK/2
+                    spx2 = spx + WALL_FRONTBACK/2
 
-                    spz1 = spz - WALL_FRONTBACK/2
-                    spz2 = spz + WALL_FRONTBACK/2
+                    spz2 = spz - WALL_WIDTH/2
+                    spz1 = spz + WALL_WIDTH/2
 
-                    spy1 = 0
-                    spy2 = spy
+                    spy2 = 0
+                    spy1 = spy
 
                     corner1 = (spx1, spy1, spz1)
                     corner2 = (spx2, spy2, spz2)
@@ -112,10 +126,27 @@ class Game:
     def update(self):
         self.all_sprites.update()
         keys = pygame.key.get_pressed()
-        if keys[pygame.K_w]:
-            bet._OGeyeX += 1
-        if keys[pygame.K_s]:
-            bet._OGeyeX -= 1
+
+        if self.player.state == 1:
+            if keys[pygame.K_w]:
+                bet._OGeyeX += 1
+            if keys[pygame.K_s]:
+                bet._OGeyeX -= 1
+        elif self.player.state == 2:
+            if keys[pygame.K_w]:
+                bet._OGeyeZ += 1
+            if keys[pygame.K_s]:
+                bet._OGeyeZ -= 1
+        elif self.player.state == 3:
+            if keys[pygame.K_w]:
+                bet._OGeyeX -= 1
+            if keys[pygame.K_s]:
+                bet._OGeyeX += 1
+        elif self.player.state == 0:
+            if keys[pygame.K_w]:
+                bet._OGeyeZ -= 1
+            if keys[pygame.K_s]:
+                bet._OGeyeZ += 1
         if not(self.player.alive()):
             self.playing = False
             self.win = False

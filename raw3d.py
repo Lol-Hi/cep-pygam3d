@@ -10,8 +10,7 @@ GRAY = (100, 100, 100)
 GREY = (180, 180, 180)
 
 def cuboid(screen, corner1, corner2, state, colorscheme, brightness):
-    # corner1 = (15, 3, 7)
-    # corner2 = (18, 0, 2)
+    # print(bet._OGeyeX, bet._OGeyeY, bet._OGeyeZ)
     lenX = corner1[0] - corner2[0]
     lenY = corner1[1] - corner2[1]
     lenZ = corner1[2] - corner2[2]

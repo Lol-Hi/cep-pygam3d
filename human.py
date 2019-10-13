@@ -150,6 +150,7 @@ class Player(Human):
                 person.loc.x-self.loc.x
             )
             self_pos = (self.loc.x, self.loc.z)
+            # print(self_pos)
             person_pos = (person.loc.x, person.loc.z)
             dist_person = distance(self_pos, person_pos)
             person_visible = True
