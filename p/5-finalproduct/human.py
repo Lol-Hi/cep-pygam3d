@@ -24,8 +24,20 @@ class Human(pg.sprite.Sprite):
         pass
 
     def update(self):
-        self.loc.x = min(WIDTH-TILESIZE, max(self.loc.x + self.vx * self.game.dt, TILESIZE))
-        self.loc.z = min(HEIGHT-TILESIZE, max(self.loc.z + self.vz * self.game.dt, TILESIZE))
+        self.loc.x = self.loc.x + self.vx * self.game.dt
+        if self.loc.x < TILESIZE:
+            self.loc.x = TILESIZE
+            self.rotate(2*math.pi)
+        if self.loc.x > WIDTH-TILESIZE:
+            self.loc.x = WIDTH-TILESIZE
+            self.rotate(2*math.pi)
+        self.loc.z = self.loc.z + self.vz * self.game.dt
+        if self.loc.z < TILESIZE:
+            self.loc.z = TILESIZE
+            self.rotate(2*math.pi)
+        if self.loc.z > WIDTH-TILESIZE:
+            self.loc.z = WIDTH-TILESIZE
+            self.rotate(2*math.pi)
         self.rect.x = self.loc.x
         hit_x = self.collision_check('x')
         self.rect.y = self.loc.z
