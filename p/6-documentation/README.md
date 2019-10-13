@@ -40,7 +40,7 @@ Pseudo-3D representation
 
 #### 2d to 3d conversion
 
-#### Hearing mechanism for player
+#### Terrorist detecting mechanism for player
 
 #### Sighting mechanism for terrorists
 
@@ -67,6 +67,9 @@ the program
 * `bet.py` – containing the `Get()` function which converts 2D coordinates to
   3D coordinates
 * `raw.py` – containing functions to blit pseudo-3D shapes
+
+Last but not least, ensure that you have downloaded pygame version 1.9.5.
+If not, you can follow the instructions [here](https://www.pygame.org/wiki/GettingStarted)
 
 ---
 ## How to use?
