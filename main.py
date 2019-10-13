@@ -89,18 +89,19 @@ class Game:
             for sp in self.player.see():
                 # print(sp.spritetype)
                 if sp.spritetype == "Wall":
-                    print(sp.loc)
+                    # print(sp.loc)
                     spx = sp.loc[0] / MAKER_TILESIZE * HUMAN_BODY_WIDTH
                     spy = sp.loc[1]
                     spz = sp.loc[2] / MAKER_TILESIZE * HUMAN_BODY_WIDTH
 
-                    # print(plx, plz)
+                    print(plx, plz)
                     # print(spx, spz)
 
                     dist = math.floor(mf.distance((plx, plz), (spx, spz))) + 1
                     brightness = min(100 / (dist**2) + 0.1, 1)
+                    brightness = 1
 
-                    # print("Dist" + str(dist))
+                    print("Dist" + str(dist))
 
                     spx1 = spx - WALL_FRONTBACK/2
                     spx2 = spx + WALL_FRONTBACK/2
@@ -114,7 +115,7 @@ class Game:
                     corner1 = (spx1, spy1, spz1)
                     corner2 = (spx2, spy2, spz2)
 
-                    # print(corner1, corner2)
+                    print(corner1, corner2)
                     raw.cuboid(self.screen, corner1, corner2, self.player.state, "white", brightness)
                     # break
             pygame.display.flip()

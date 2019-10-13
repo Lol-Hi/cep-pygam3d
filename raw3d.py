@@ -46,18 +46,18 @@ def cuboid(screen, corner1, corner2, state, colorscheme, brightness):
         verticeH = (verticeH[2], verticeH[1], -verticeH[0])
 
     elif state == 3:
-        # print(bet._eyeX, bet._eyeZ)
         bet._eyeX = -bet._OGeyeX
         bet._eyeZ = -bet._OGeyeZ
+        print(bet._eyeX, bet._eyeZ)
 
-        verticeA = (-verticeA[2], verticeA[1], verticeA[0])
-        verticeB = (-verticeB[2], verticeB[1], verticeB[0])
-        verticeC = (-verticeC[2], verticeC[1], verticeC[0])
-        verticeD = (-verticeD[2], verticeD[1], verticeD[0])
-        verticeE = (-verticeE[2], verticeE[1], verticeE[0])
-        verticeF = (-verticeF[2], verticeF[1], verticeF[0])
-        verticeG = (-verticeG[2], verticeG[1], verticeG[0])
-        verticeH = (-verticeH[2], verticeH[1], verticeH[0])
+        verticeA = (-verticeA[0], verticeA[1], -verticeA[2])
+        verticeB = (-verticeB[0], verticeB[1], -verticeB[2])
+        verticeC = (-verticeC[0], verticeC[1], -verticeC[2])
+        verticeD = (-verticeD[0], verticeD[1], -verticeD[2])
+        verticeE = (-verticeE[0], verticeE[1], -verticeE[2])
+        verticeF = (-verticeF[0], verticeF[1], -verticeF[2])
+        verticeG = (-verticeG[0], verticeG[1], -verticeG[2])
+        verticeH = (-verticeH[0], verticeH[1], -verticeH[2])
 
     elif state == 0:
         oldX = bet._OGeyeX

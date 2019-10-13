@@ -56,9 +56,9 @@ class Human(pygame.sprite.Sprite):
 
     def rotate(self, theta):
         self.front += theta
-        if self.front > math.pi:
+        if self.front > 3*math.pi/2:
             self.front -= 2*math.pi
-        if self.front < -math.pi:
+        if self.front < 0:
             self.front += 2*math.pi
 
 
@@ -138,7 +138,13 @@ class Player(Human):
                 signed_dist_z,
                 signed_dist_x
             )
-            if in_range(phi, self.front-SIGHT_RANGE, self.front+SIGHT_RANGE):
+            print("congo", phi, self.front)
+            minimum = self.front-SIGHT_RANGE
+            maximum = self.front+SIGHT_RANGE
+            if self.state != 1:
+                if phi < 0:
+                    phi += 2*math.pi
+            if in_range(phi, minimum, maximum):
                 # visible_obs.append(obstacle)
                 visible_obs[obstacle] = distance((self.loc.x, self.loc.z), (obstacle.loc.x, obstacle.loc.z))
         humans = self.game.civilians.sprites() + self.game.terrorists.sprites()
@@ -321,7 +327,7 @@ class Terrorist(Human):
     def shoot(self):
         bullet_x = self.rect.centerx + (TILESIZE//2 * math.cos(self.front))
         bullet_z = self.rect.centery + (TILESIZE//2 * math.sin(self.front))
-        Bullet(self.game, self.front, bullet_x, bullet_z)
+        # Bullet(self.game, self.front, bullet_x, bullet_z)
 
 
 class Civilian(Human):
