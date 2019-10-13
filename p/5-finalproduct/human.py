@@ -71,6 +71,7 @@ class Player(Human):
         super().__init__(game, x, y, z)
         self.calling = False
         self.call_start = 0
+        self.call_time = 0
         self.hear_count = 0
 
     def drawImage(self):
@@ -113,8 +114,8 @@ class Player(Human):
         keys = pg.key.get_pressed()
         self.get_direction(keys)
         if self.calling:
-            call_time = pg.time.get_ticks()-self.call_start
-            if call_time > MAX_CALL_TIME*1000:
+            self.call_time = pg.time.get_ticks()-self.call_start
+            if self.call_time > MAX_CALL_TIME*1000:
                 self.calling = False
                 self.game.countdown_start = pg.time.get_ticks()
         else:

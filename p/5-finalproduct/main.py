@@ -80,6 +80,7 @@ class Game:
             if self.curr_countdown > MAX_COUNTDOWN_TIME*1000:
                 self.playing = False
                 self.win = True
+        #print(self.player.front, [obj.loc for obj in self.player.see()])
 
     def events(self):
         for event in pg.event.get():
@@ -113,17 +114,27 @@ class Game:
 
     def phone(self):
         pg.draw.rect(self.screen, BLACK, [PHONE_LEFT, HEIGHT-PHONE_HEIGHT, PHONE_WIDTH, PHONE_HEIGHT])
-        pg.draw.rect(self.screen, WHITE, [PHONE_LEFT+SIDE_BEZEL, HEIGHT-PHONESCREEN_HEIGHT, PHONESCREEN_WIDTH, PHONESCREEN_HEIGHT])
+        pg.draw.rect(self.screen, BLUEGREY, [PHONE_LEFT+SIDE_BEZEL, HEIGHT-PHONESCREEN_HEIGHT, PHONESCREEN_WIDTH, PHONESCREEN_HEIGHT])
+        curr_calltime = self.player.call_time//1000
         police_text = "999"
         self.screen.blit(
-            self.normal_font.render(police_text, True, BLACK),
+            self.normal_font.render(police_text, True, WHITE),
             (PHONE_LEFT+SIDE_BEZEL+(PHONESCREEN_WIDTH-self.normal_font.size(police_text)[0])//2, HEIGHT-PHONESCREEN_HEIGHT+PHONESCREEN_PADDING)
         )
-        calling_text = "calling..."
+        calling_text = "00:0{}".format(curr_calltime) if curr_calltime < 9 else "call ended"
         self.screen.blit(
-            self.tiny_font.render(calling_text, True, BLACK),
+            self.tiny_font.render(calling_text, True, WHITE),
             (PHONE_LEFT+SIDE_BEZEL+(PHONESCREEN_WIDTH-self.tiny_font.size(calling_text)[0])//2, HEIGHT-PHONESCREEN_HEIGHT+self.normal_linesize)
         )
+        for i in range(0, 9):
+            curr_x = int(PHONE_LEFT+SIDE_BEZEL+(i%3+1)*PHONESCREEN_WIDTH//4)
+            curr_z = HEIGHT-PHONESCREEN_HEIGHT+PHONESCREEN_PADDING+2*self.normal_linesize+i//3*(self.normal_linesize)
+            pg.draw.circle(self.screen, WHITE, (curr_x, curr_z), BUTTON_RADIUS, 1)
+            self.screen.blit(
+                self.tiny_font.render(str(i+1), True, WHITE),
+                (curr_x-self.tiny_font.size(str(i+1))[0]/4, curr_z-self.tiny_font.get_linesize()/2)
+            ) # Don't know why we need to divide by 4 instead of 2, but it fits better this way
+        pg.draw.circle(self.screen, RED, (int(PHONE_LEFT+SIDE_BEZEL+PHONESCREEN_WIDTH//2), HEIGHT), BUTTON_RADIUS)
 
     def start(self):
         self.screen.fill(LIGHTBLUE)
