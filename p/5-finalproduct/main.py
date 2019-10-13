@@ -19,6 +19,7 @@ class Game:
         self.clock = pg.time.Clock()
         pg.key.set_repeat(500, 100)
         self.load_data()
+        self.level = "sample" #for testing purposes, will change later
 
     def load_data(self):
         self.game_folder = os.path.dirname(__file__)
@@ -34,14 +35,13 @@ class Game:
         self.footsteps2 = pg.mixer.music.load(os.path.join(self.assets_folder, "footsteps.wav"))
 
     def new(self):
-        self.level = "sample" #for testing purposes, will change later
+        self.start_time = pg.time.get_ticks()
         self.all_sprites = pg.sprite.Group()
         self.terrorists = pg.sprite.Group()
         self.civilians = pg.sprite.Group()
         self.obstacles = pg.sprite.Group()
         self.mapreader()
-        self.start_countdown = False
-        self.countdown = 0
+        self.countdown_start = 0
 
 
     def mapreader(self):
@@ -74,11 +74,11 @@ class Game:
         if not(self.player.alive()):
             self.playing = False
             self.win = False
-        if self.start_countdown:
-            self.countdown += 1
-        if self.countdown > COUNTDOWN_TIME:
-            self.playing = False
-            self.win = True
+        if self.countdown_start:
+            self.curr_countdown = pg.time.get_ticks()-self.countdown_start
+            if self.curr_countdown > MAX_COUNTDOWN_TIME*1000:
+                self.playing = False
+                self.win = True
 
     def events(self):
         for event in pg.event.get():
@@ -92,6 +92,9 @@ class Game:
         self.screen.fill(WHITE)
         self.all_sprites.draw(self.screen)
         pg.display.flip()
+
+    def menu(self):
+        pass
 
     def start(self):
         self.screen.fill(LIGHTBLUE)
@@ -153,7 +156,6 @@ class Game:
                 if event.key == pg.K_ESCAPE:
                     self.quit()
                 if event.key == pg.K_RETURN:
-                    self.start_time = pg.time.get_ticks()
                     return
 
     def end(self):
@@ -161,11 +163,8 @@ class Game:
         self.terrorists.empty()
         self.civilians.empty()
         self.obstacles.empty()
-
-        del self.all_sprites
-        del self.terrorists
-        del self.civilians
-        del self.obstacles
+        if self.player.alive:
+            self.player.kill()
 
         self.end_time = pg.time.get_ticks()
         time_elapsed = (self.end_time-self.start_time)//1000

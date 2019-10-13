@@ -24,8 +24,8 @@ class Human(pg.sprite.Sprite):
         pass
 
     def update(self):
-        self.loc.x += self.vx * self.game.dt
-        self.loc.z += self.vz * self.game.dt
+        self.loc.x = min(WIDTH-TILESIZE, max(self.loc.x + self.vx * self.game.dt, TILESIZE))
+        self.loc.z = min(HEIGHT-TILESIZE, max(self.loc.z + self.vz * self.game.dt, TILESIZE))
         self.rect.x = self.loc.x
         hit_x = self.collision_check('x')
         self.rect.y = self.loc.z
@@ -34,23 +34,26 @@ class Human(pg.sprite.Sprite):
 
 
     def collision_check(self, dir):
-        hits = pg.sprite.spritecollide(self, self.game.obstacles, False)
-        if hits:
-            if dir == 'x':
+        if dir == 'x':
+            hits = pg.sprite.spritecollide(self, self.game.obstacles, False)
+            if hits:
                 if self.vx > 0:
                     self.loc.x = hits[0].rect.left - self.rect.width
                 if self.vx < 0:
                     self.loc.x = hits[0].rect.right
                 self.vx = 0
                 self.rect.x = self.loc.x
-            if dir == 'z':
+                return hits
+        if dir == 'z':
+            hits = pg.sprite.spritecollide(self, self.game.obstacles, False)
+            if hits:
                 if self.vz > 0:
                     self.loc.z = hits[0].rect.top - self.rect.height
                 if self.vz < 0:
                     self.loc.z = hits[0].rect.bottom
                 self.vz = 0
                 self.rect.y = self.loc.z
-        return hits
+                return hits
 
     def rotate(self, theta):
         self.front += theta
@@ -67,7 +70,7 @@ class Player(Human):
     def __init__(self, game, x, y, z):
         super().__init__(game, x, y, z)
         self.calling = False
-        self.call_counter = 0
+        self.call_start = 0
         self.hear_count = 0
 
     def drawImage(self):
@@ -77,10 +80,9 @@ class Player(Human):
         pg.draw.circle(player, RED, (TILESIZE//2, TILESIZE//2), TILESIZE//2)
         return player
 
-    def get_movement(self):
+    def get_movement(self, keys):
         self.vx, self.vz = 0, 0
         direction = self.front
-        keys = pg.key.get_pressed()
         if keys[pg.K_a]:
             direction -= math.pi/2
             self.vx, self.vz = PLAYER_SPEED, PLAYER_SPEED
@@ -95,31 +97,31 @@ class Player(Human):
         self.vx *= math.cos(direction)
         self.vz *= math.sin(direction)
 
-    def get_direction(self):
-        keys = pg.key.get_pressed()
+    def get_direction(self, keys):
         if keys[pg.K_LEFT]:
             self.rotate(PLAYER_TURN)
         if keys[pg.K_RIGHT]:
             self.rotate(-PLAYER_TURN)
 
-    def check_calling(self):
-        keys = pg.key.get_pressed()
-        if keys[pg.K_e]:
-            self.calling = True
+    def check_calling(self, keys):
+        if not(self.game.countdown_start):
+            if keys[pg.K_e]:
+                self.calling = True
+                self.call_start = pg.time.get_ticks()
 
     def update(self):
-        self.get_direction()
-        self.check_calling()
+        keys = pg.key.get_pressed()
+        self.get_direction(keys)
         if self.calling:
-            self.call_counter += 1
-            if self.call_counter >= CALL_TIME:
+            call_time = pg.time.get_ticks()-self.call_start
+            if call_time > MAX_CALL_TIME*1000:
                 self.calling = False
-                self.game.start_countdown = True
         else:
             self.hear_count += 1
             if self.hear_count%3 == 0:
                 self.hear()
-            self.get_movement()
+            self.check_calling(keys)
+            self.get_movement(keys)
             super().update()
 
     def see(self):
@@ -181,7 +183,7 @@ class Player(Human):
                 t_nearby += 1
                 alpha = signed_basic_angle(self.front-t_phi)
                 beta = math.pi/2-abs(alpha)
-                theta = math.asin(math.sin(beta)*(TILESIZE/2)/t_dist)
+                theta = math.asin(min(1, max(math.sin(beta)*(TILESIZE/2)/t_dist, -1)))
                 total_vol = 1-t_dist/HEARING_RADIUS if total_vol == 0 else (1-t_dist/HEARING_RADIUS+total_vol)/2
                 softer_vol = 2*(beta-theta)/math.pi
                 louder_vol = 2*(beta+theta)/math.pi
@@ -191,13 +193,13 @@ class Player(Human):
                 else:
                     l_vol = louder_vol if l_vol == 0 else (l_vol+softer_vol)/2
                     r_vol = louder_vol if r_vol == 0 else (r_vol+softer_vol)/2
-        try:
-            self.game.footsteps.set_volume(total_vol/2)
-            self.game.sound_channel.set_volume(l_vol, r_vol)
-            self.game.sound_channel.play(self.game.footsteps)
-        except:
-            self.game.footsteps2.set_volume(total_vol/2)
-            self.game.footsteps2.play()
+    #     try:
+    #         self.game.footsteps.set_volume(total_vol/2)
+    #         self.game.sound_channel.set_volume(l_vol, r_vol)
+    #         self.game.sound_channel.play(self.game.footsteps)
+    #     except:
+    #         self.game.footsteps2.set_volume(total_vol/2)
+    #         self.game.footsteps2.play()
 
 
 

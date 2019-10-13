@@ -35,7 +35,6 @@ class Bullet(pg.sprite.Sprite):
         if pg.sprite.collide_rect(self, self.game.player):
             self.kill()
             self.game.player.kill()
-            self.playing = False
 
     def draw(self, screen):
         screen.blit(self.image, self.rect)

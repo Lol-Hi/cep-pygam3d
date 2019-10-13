@@ -10,7 +10,9 @@ def lines_intersect(p1, p2, p3, p4):
         return True
     intersection_x = ((x2*y1-x1*y2)*(x4-x3)-(x4*y3-x3*y4)*(x2-x1))/denominator
     intersection_y = ((x2*y1-x1*y2)*(y4-y3)-(x4*y3-x3*y4)*(y2-y1))/denominator
-    return in_range(intersection_x, x1, x2) and in_range(intersection_y, y1, y2)
+    between_x = in_range(intersection_x, x1, x2)
+    between_y = in_range(intersection_y, y1, y2)
+    return between_x and between_y
 
 def in_range(val, lower, upper):
     return val >= lower and val <= upper
