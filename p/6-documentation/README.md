@@ -84,8 +84,23 @@ class Player(Human):
 #### Sighting mechanism for terrorists
 Firstly we have to check which civilians the terrorist is able to spot,
 and this is done in the `see()` method.
-All the obstacles that are in range of the terrorist's sight are collated first,
-before they are used to check if civilian sprites are blocked by
+All the obstacles that are in range of the terrorist's sight are collated before
+the program checks for the civilians.
+If the civilian appears in the range of sight of the terrorist,
+he will be detected no matter how far away he is from the terrorist,
+but if it is not, those that are outside a certain radius will not be detected.
+Afterwards, the program checks if the civilians are blocked by an obstacle
+by drawing a line between the terrorist and each detected civilian
+and seeing if it intersects the 2 diagonals of each wall.
+Those that are not blocked will be returned.
+
+In the `search_aim()` function, if the terrorist does not detect any civilians,
+it will simply continue moving.
+Or else, it will look for the closest civilian to start shooting.
+When it is shooting, it will not move until the person is killed,
+or after a certain amount of time which indicates that there is some other
+reason that it is not able to shoot the target,
+in this case the terrorist will move on and shoot his next target.
 
 ```python
 # in human.py
