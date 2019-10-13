@@ -314,6 +314,9 @@ class Terrorist(Human):
             person_pos = (person.loc.x, person.loc.z)
             dist_person = distance(self_pos, person_pos)
             person_visible = True
+            if not in_range(phi, self.front-SIGHT_RANGE, self.front+SIGHT_RANGE):
+                if dist_person > SIGHT_RADIUS:
+                    continue
             for obstacle in in_range_obs:
                 intersect_diag1 = lines_intersect(
                     self_pos,
@@ -330,9 +333,6 @@ class Terrorist(Human):
                 if intersect_diag1 or intersect_diag2:
                     person_visible = False
                     break
-            if not in_range(phi, self.front-SIGHT_RANGE, self.front+SIGHT_RANGE):
-                if dist_person > SIGHT_RADIUS:
-                    continue
             if person_visible:
                 can_see.append({"person": person, "phi": phi, "pos": person_pos})
         return can_see
