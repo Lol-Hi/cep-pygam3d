@@ -19,7 +19,7 @@ class Game:
         self.clock = pg.time.Clock()
         pg.key.set_repeat(500, 100)
         self.load_data()
-        self.level = 5
+        self.level = 1
 
     def load_data(self):
         self.game_folder = os.path.dirname(__file__)
@@ -71,6 +71,7 @@ class Game:
             self.draw()
 
     def update(self):
+        self.arrows = []
         self.all_sprites.update()
         if not(self.player.alive()):
             self.playing = False
@@ -96,7 +97,26 @@ class Game:
         self.menu()
         if self.player.calling:
             self.phone()
+        for arrow in self.arrows:
+            self.arrow(arrow)
         pg.display.flip()
+
+    def arrow(self, arrow_lst):
+        orientation, x, y = arrow_lst
+        p1 = (x, y)
+        if orientation == "up":
+            p2 = (x+ARROW_WIDTH//2, y+ARROW_LEN)
+            p3 = (x-ARROW_WIDTH//2, y+ARROW_LEN)
+        elif orientation == "down":
+            p2 = (x+ARROW_WIDTH//2, y-ARROW_LEN)
+            p3 = (x-ARROW_WIDTH//2, y-ARROW_LEN)
+        elif orientation == "left":
+            p2 = (x+ARROW_LEN, y+ARROW_WIDTH//2)
+            p3 = (x+ARROW_LEN, y-ARROW_WIDTH//2)
+        else:
+            p2 = (x-ARROW_LEN, y+ARROW_WIDTH//2)
+            p3 = (x-ARROW_LEN, y-ARROW_WIDTH//2)
+        pg.draw.polygon(self.screen, RED, [p1, p2, p3])
 
     def menu(self):
         pg.draw.rect(self.screen, BLACK, [0, 0, WIDTH, MENU_HEIGHT])

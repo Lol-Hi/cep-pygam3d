@@ -119,9 +119,10 @@ class Player(Human):
                 self.calling = False
                 self.game.countdown_start = pg.time.get_ticks()
         else:
-            self.hear_count += 1
-            if self.hear_count%3 == 0:
-                self.hear()
+            # self.hear_count += 1
+            # if self.hear_count%3 == 0:
+            #     self.hear()
+            self.detect_terrorists()
             self.check_calling(keys)
             self.get_movement(keys)
             super().update()
@@ -203,6 +204,28 @@ class Player(Human):
     #         self.game.footsteps2.set_volume(total_vol/2)
     #         self.game.footsteps2.play()
 
+    def detect_terrorists(self):
+        for t in self.game.terrorists.sprites():
+            t_dist = distance((self.loc.x, self.loc.z), (t.loc.x, t.loc.z))
+            if t_dist <= DETECTION_RADIUS:
+                angle_diff = self.front - math.atan2(self.loc.z-t.loc.z, self.loc.x-t.loc.x)
+                if in_range(angle_diff, -math.pi/4, math.pi/4):
+                    arrow_orientation = "down"
+                    arrow_x = WIDTH//2*(math.cos(angle_diff)+math.sin(angle_diff))
+                    arrow_y = HEIGHT
+                elif in_range(angle_diff, math.pi/4, 3*math.pi/4):
+                    arrow_orientation = "right"
+                    arrow_x = WIDTH
+                    arrow_y = HEIGHT//2*(math.sin(angle_diff)+math.cos(angle_diff))
+                elif in_range(angle_diff, -3*math.pi/4, -math.pi/4):
+                    arrow_orientation = "left"
+                    arrow_x = 0
+                    arrow_y = HEIGHT//2*(math.sin(angle_diff)+math.cos(angle_diff))
+                else:
+                    arrow_orientation = "up"
+                    arrow_x = WIDTH//2*(math.cos(angle_diff)+math.sin(angle_diff))
+                    arrow_y = MENU_HEIGHT
+                self.game.arrows.append([arrow_orientation, arrow_x, arrow_y])
 
 
 class Terrorist(Human):

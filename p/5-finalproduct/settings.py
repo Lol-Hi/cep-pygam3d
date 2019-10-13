@@ -57,6 +57,11 @@ PLAYER_TURN = math.pi/50
 PLAYER_SPEED = 100
 MAX_CALL_TIME = 10
 HEARING_RADIUS = 100
+DETECTION_RADIUS = 300
+
+# Arrow (terrorist detection) settings
+ARROW_LEN = 8
+ARROW_WIDTH = 10
 
 # NPC settings
 SHOOT_INTERVAL = 2
@@ -67,8 +72,6 @@ NPC_SPEED = 75
 BULLET_WIDTH = 2
 BULLET_HEIGHT = 2
 BULLET_SPEED = 150
-
-# Obstacle settings
 
 # Wall settings
 WALL_HEIGHT = 8
