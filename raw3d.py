@@ -48,7 +48,7 @@ def cuboid(screen, corner1, corner2, state, colorscheme, brightness):
     elif state == 3:
         bet._eyeX = -bet._OGeyeX
         bet._eyeZ = -bet._OGeyeZ
-        print(bet._eyeX, bet._eyeZ)
+        # print(bet._eyeX, bet._eyeZ)
 
         verticeA = (-verticeA[0], verticeA[1], -verticeA[2])
         verticeB = (-verticeB[0], verticeB[1], -verticeB[2])

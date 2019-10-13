@@ -12,7 +12,7 @@ class Human(pygame.sprite.Sprite):
         self.groups = game.all_sprites
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.game = game
-        self.image = self.drawImage()
+        self.image = self.drawImage().convert()
         self.rect = self.image.get_rect()
         self.loc = pygame.math.Vector3(x*TILESIZE, y, z*TILESIZE)
         self.rect.x = self.loc.x
@@ -34,22 +34,25 @@ class Human(pygame.sprite.Sprite):
 
     def collision_check(self, dir):
         if dir == 'x':
-            hits = pygame.sprite.spritecollide(self, self.game.obstacles, False)
+            hits = pygame.sprite.spritecollideany(self, self.game.obstacles, False)
             if hits:
                 if self.vx > 0:
-                    self.loc.x = hits[0].rect.left - self.rect.width
+                    self.loc.x = hits.rect.left - self.rect.width - 4
                 if self.vx < 0:
-                    self.loc.x = hits[0].rect.right
+                    self.loc.x = hits.rect.right + 4
                 self.vx = 0
                 self.rect.x = self.loc.x
                 return hits
         if dir == 'z':
-            hits = pygame.sprite.spritecollide(self, self.game.obstacles, False)
+            hits = pygame.sprite.spritecollideany(self, self.game.obstacles, False)
             if hits:
+                # print("COLLIDING")
+                # print(self.rect)
+                # print(hits.rect)
                 if self.vz > 0:
-                    self.loc.z = hits[0].rect.top - self.rect.height
+                    self.loc.z = hits.rect.top - self.rect.height - 4
                 if self.vz < 0:
-                    self.loc.z = hits[0].rect.bottom
+                    self.loc.z = hits.rect.bottom + 4
                 self.vz = 0
                 self.rect.y = self.loc.z
                 return hits
@@ -92,12 +95,21 @@ class Player(Human):
         #     direction += math.pi/2
         #     self.vx, self.vz= PLAYER_SPEED, PLAYER_SPEED
         if keys[pygame.K_w]:
-            self.vx, self.vz= PLAYER_SPEED, PLAYER_SPEED
+            if not self.collision_check("x") and not self.collision_check("z"):
+                self.vx, self.vz= PLAYER_SPEED, PLAYER_SPEED
+            else:
+                self.vx = 0
+                self.vz = 0
         if keys[pygame.K_s]:
             direction += math.pi
-            self.vx, self.vz= PLAYER_SPEED, PLAYER_SPEED
+            if not self.collision_check("x") and not self.collision_check("z"):
+                self.vx, self.vz= PLAYER_SPEED, PLAYER_SPEED
+            else:
+                self.vx = 0
+                self.vz = 0
         self.vx *= math.cos(direction)
         self.vz *= math.sin(direction)
+
 
     def get_direction(self):
         keys = pygame.key.get_pressed()
@@ -114,6 +126,7 @@ class Player(Human):
             self.calling = True
 
     def update(self):
+        # print(self.vx, self.vz)
         self.get_direction()
         self.check_calling()
         if self.calling:
@@ -138,7 +151,7 @@ class Player(Human):
                 signed_dist_z,
                 signed_dist_x
             )
-            print("congo", phi, self.front)
+            # print("congo", phi, self.front)
             minimum = self.front-SIGHT_RANGE
             maximum = self.front+SIGHT_RANGE
             if self.state != 1:
@@ -248,9 +261,10 @@ class Terrorist(Human):
         if self.move:
             self.vx = math.cos(self.front) * NPC_SPEED
             self.vz = math.sin(self.front) * NPC_SPEED
-            collision = super().update()
-            if collision:
-                self.rotate(math.pi)
+            # TODO: uncomment
+            # collision = super().update()
+            # if collision:
+            #     self.rotate(math.pi)
 
     def search_aim(self):
         can_see = self.see()
@@ -347,6 +361,7 @@ class Civilian(Human):
     def update(self):
         self.vx = math.cos(self.front) * NPC_SPEED
         self.vz = math.sin(self.front) * NPC_SPEED
-        collision = super().update()
-        if collision:
-            self.rotate(random.uniform(-math.pi, math.pi))
+        # TODO: uncomment
+        # collision = super().update()
+        # if collision:
+        #     self.rotate(random.uniform(-math.pi, math.pi))

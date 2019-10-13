@@ -101,7 +101,7 @@ class Game:
                     brightness = min(100 / (dist**2) + 0.1, 1)
                     brightness = 1
 
-                    print("Dist" + str(dist))
+                    # print("Dist" + str(dist))
 
                     spx1 = spx - WALL_FRONTBACK/2
                     spx2 = spx + WALL_FRONTBACK/2
@@ -115,12 +115,17 @@ class Game:
                     corner1 = (spx1, spy1, spz1)
                     corner2 = (spx2, spy2, spz2)
 
-                    print(corner1, corner2)
+                    # print(corner1, corner2)
                     raw.cuboid(self.screen, corner1, corner2, self.player.state, "white", brightness)
                     # break
             pygame.display.flip()
             # quit(1)
             # os.system("pause")
+            # for sp in self.obstacles:
+            #     sp.change(LIGHTBLUE)
+            # for sp in self.player.see():
+            #     if sp.spritetype == "Wall":
+            #         sp.change(BLACK)
             # self.draw()
 
 
@@ -128,6 +133,7 @@ class Game:
         self.all_sprites.update()
         keys = pygame.key.get_pressed()
 
+        # TODO: move this under player collision check results
         if self.player.state == 1:
             if keys[pygame.K_w]:
                 bet._OGeyeX += 1
