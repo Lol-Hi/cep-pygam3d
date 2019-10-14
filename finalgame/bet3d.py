@@ -86,4 +86,5 @@ def getY(vector):
     return translatedY
 
 def Get(vector):
+    """Transforms the 3d coordinates to pseudo-3d coordinates"""
     return(getX(vector), getY(vector))

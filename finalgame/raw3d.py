@@ -10,10 +10,13 @@ GRAY = (100, 100, 100)
 GREY = (180, 180, 180)
 
 def cuboid(screen, corner1, corner2, state, colorscheme = "normal", brightness = 1):
+    """Draw a pseudo-3d cuboid based on 2 opposite corners"""
+    # get the lengths of the edges of the cuboid
     lenX = corner1[0] - corner2[0]
     lenY = corner1[1] - corner2[1]
     lenZ = corner1[2] - corner2[2]
 
+    # get the 3d coordinates of the vertices of the cuboid
     verticeA = corner1
     verticeB = (verticeA[0] - lenX, verticeA[1], verticeA[2])
     verticeC = (verticeB[0], verticeB[1] - lenY, verticeB[2])
@@ -24,6 +27,8 @@ def cuboid(screen, corner1, corner2, state, colorscheme = "normal", brightness =
     verticeG = (verticeC[0], verticeC[1], verticeC[2] - lenZ)
     verticeH = (verticeD[0], verticeD[1], verticeD[2] - lenZ)
 
+    # if the player is facing forward then keep the camera as it is
+    # Otherwise, change the camera direction and the location of the vertices with respect from the player
     if state == 1:
         bet._eyeX = bet._OGeyeX
         bet._eyeZ = bet._OGeyeZ
@@ -89,6 +94,7 @@ def cuboid(screen, corner1, corner2, state, colorscheme = "normal", brightness =
     else:
         posY = 0
 
+    # get the pseudo-3d coordinates of the vertices of the cuboid
     verticeA = bet.Get(verticeA)
     verticeB = bet.Get(verticeB)
     verticeC = bet.Get(verticeC)
@@ -99,6 +105,8 @@ def cuboid(screen, corner1, corner2, state, colorscheme = "normal", brightness =
     verticeH = bet.Get(verticeH)
     # here
 
+    # get the faces of the rectangles used to show the pseudo-3d cuboid
+    # based on the direction of the camera and the pseudo-3d vertices
     if state == 1:
         faceRight = [verticeA, verticeB, verticeC, verticeD]
         faceLeft = [verticeE, verticeF, verticeG, verticeH]
@@ -131,6 +139,7 @@ def cuboid(screen, corner1, corner2, state, colorscheme = "normal", brightness =
         faceTop = [verticeA, verticeB, verticeF, verticeE]
         faceBottom = [verticeD, verticeC, verticeG, verticeH]
 
+    # determining the colour scheme
     tblue = BLUE
     tgreen = GREEN
     tblack = BLACK
@@ -148,6 +157,7 @@ def cuboid(screen, corner1, corner2, state, colorscheme = "normal", brightness =
     tgreen = tuple([brightness * x for x in tgreen])
     tblack = tuple([brightness * x for x in tblack])
 
+    # drawing the required rectangles to form the pseudo-3d cuboid
     if posX == -1 and posY == -1:
         pygame.draw.polygon(screen, tblue, faceRight)
         pygame.draw.polygon(screen, tgreen, faceFront)
@@ -181,17 +191,22 @@ def cuboid(screen, corner1, corner2, state, colorscheme = "normal", brightness =
 
 
 def sheet(screen, corner1, corner2):
+    """Draw a pseudo-3d surface (a converging 2d sheet) based on 2 opposite corners"""
+    # get the lengths of the edges of the sheets
     lenX = corner1[0] - corner2[0]
     lenY = corner1[1] - corner2[1]
 
+    # get the 3d coordinates of the vertices of the sheet
     verticeA = corner1
     verticeB = (corner1[0], corner1[1] - lenY, corner1[2])
     verticeC = corner2
     verticeD = (corner2[0], corner2[1] + lenY, corner2[2])
 
+    # get the pseudo-3d coordinates of the vertices of the sheet
     verticeA = bet.Get(verticeA)
     verticeB = bet.Get(verticeB)
     verticeC = bet.Get(verticeC)
     verticeD = bet.Get(verticeD)
 
+    # draw the quadrilateral which represents the sheet in pseudo-3d
     pygame.draw.polygon(screen, BLACK, [verticeA, verticeB, verticeC, verticeD])
