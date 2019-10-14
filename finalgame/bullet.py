@@ -1,19 +1,20 @@
-import pygame as pg
+import pygame
 from settings import *
 import math
 
-class Bullet(pg.sprite.Sprite):
+class Bullet(pygame.sprite.Sprite):
     def __init__(self, game, direction, x, z):
+        """Initialises attributes specific to the bullet"""
         self.groups = game.all_sprites
-        pg.sprite.Sprite.__init__(self, self.groups)
+        pygame.sprite.Sprite.__init__(self, self.groups)
         self.game = game
-        #self.image = self.drawImage()
-        self.rect = pg.Surface((TILESIZE, TILESIZE)).convert().get_rect()
+        self.rect = pygame.Surface((TILESIZE, TILESIZE)).convert().get_rect()
         self.direction = direction
-        self.loc = pg.math.Vector3(x, BULLET_HEIGHT, z)
+        self.loc = pygame.math.Vector3(x, BULLET_HEIGHT, z)
         self.vx, self.vz = 0, 0
 
     def update(self):
+        """Updates the movement of the bullet"""
         self.vx = math.cos(self.direction)*BULLET_SPEED
         self.vz = math.sin(self.direction)*BULLET_SPEED
         self.loc.x += self.vx * self.game.dt
@@ -23,10 +24,14 @@ class Bullet(pg.sprite.Sprite):
         self.checkcollision()
 
     def checkcollision(self):
-        collided_humans = pg.sprite.spritecollide(self, self.game.civilians, True)
-        collided_obstacles = pg.sprite.spritecollide(self, self.game.obstacles, False)
+        """Checks for collisions for the bullet"""
+        # If the bullet bumps into a civilian, kill the civilian and destroy the bullet
+        collided_humans = pygame.sprite.spritecollide(self, self.game.civilians, True)
+        # If the bullet bumps into an obstacle, destroy the bullet
+        collided_obstacles = pygame.sprite.spritecollide(self, self.game.obstacles, False)
         if collided_humans or collided_obstacles:
             self.kill()
-        if pg.sprite.collide_rect(self, self.game.player):
+        # If the bullet bumps into the player, kill the player and destroy the bullet
+        if pygame.sprite.collide_rect(self, self.game.player):
             self.kill()
             self.game.player.kill()

@@ -16,8 +16,6 @@ PURPLE = (128, 0, 128)
 
 
 # Game settings
-# WIDTH = 750
-# HEIGHT = 750
 WIDTH = 400
 HEIGHT = 300
 TILESIZE = 10
@@ -74,7 +72,6 @@ HUMAN_LEG_FRONTBACK = 1.0
 
 
 # Player settings
-# PLAYER_TURN = math.pi/50
 PLAYER_TURN = math.pi/2
 PLAYER_SPEED = 100
 MAX_CALL_TIME = 10

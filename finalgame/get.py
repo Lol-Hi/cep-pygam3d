@@ -28,5 +28,5 @@ class Data:
 constants = Data()
 coords = Coords()
 
-print(newgetx(coords, constants))
-print(newgety(coords, constants))
+#print(newgetx(coords, constants))
+#print(newgety(coords, constants))
