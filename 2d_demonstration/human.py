@@ -207,7 +207,7 @@ class Player(Human):
                     r_vol = louder_vol if r_vol == 0 else (r_vol+louder_vol)/2
                 else:
                     l_vol = louder_vol if l_vol == 0 else (l_vol+softer_vol)/2
-                    r_vol = louder_vol if r_vol == 0 else (r_vol+softer_vol)/2
+                    r_vol = softer_vol if r_vol == 0 else (r_vol+softer_vol)/2
     #     try:
     #         self.game.footsteps.set_volume(total_vol/2)
     #         self.game.sound_channel.set_volume(l_vol, r_vol)

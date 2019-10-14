@@ -81,7 +81,6 @@ class Game:
             if self.curr_countdown > MAX_COUNTDOWN_TIME*1000:
                 self.playing = False
                 self.win = True
-        #print(self.player.front, [obj.loc for obj in self.player.see()])
 
     def events(self):
         for event in pg.event.get():
