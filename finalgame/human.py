@@ -301,6 +301,10 @@ class Player(Human):
             t_dist = distance((self.loc.x, self.loc.z), (t.loc.x, t.loc.z))
             if t_dist <= DETECTION_RADIUS:
                 # Determine the location of the arrows
+                # WIDTH//2 or HEIGHT//2 is added to ensure that the arrow will appear in the middle
+                # when the terrorist is directly to the front/back/left/right of the player
+                # math.sin() and math.cos() will move the arrow left and right/up and down
+                # proportionally to the angle made between the player and the terrorist
                 angle_diff = self.front - math.atan2(self.loc.z-t.loc.z, self.loc.x-t.loc.x)
                 if in_range(angle_diff, -math.pi/4, math.pi/4):
                     arrow_orientation = "down"
