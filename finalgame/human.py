@@ -276,8 +276,8 @@ class Player(Human):
                 beta = math.pi/2-abs(alpha)
                 theta = math.asin(math.sin(beta)*(TILESIZE/2)/t_dist)
                 total_vol = 1-t_dist/HEARING_RADIUS if total_vol == 0 else (1-t_dist/HEARING_RADIUS+total_vol)/2
-                softer_vol = 2*(beta-theta)/math.pi
-                louder_vol = 2*(beta+theta)/math.pi
+                softer_vol = 2*(math.pi/2-beta+theta)/math.pi
+                louder_vol = 2*(math.pi/2-beta-theta)/math.pi
                 if alpha > 0:
                     l_vol = softer_vol if l_vol == 0 else (l_vol+softer_vol)/2
                     r_vol = louder_vol if r_vol == 0 else (r_vol+louder_vol)/2
