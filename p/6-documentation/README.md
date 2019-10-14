@@ -148,16 +148,18 @@ def Get(vector):
 Firstly, the lengths and vertices of the cuboid have to be determined,
 and then altered based on the diagram below:
 
+![](readme_assets/turning.jpg)
+_The yellow dot indicates the location of the camera, which is pointing in the x-direction (indicated by green). The red dot indicates the location of the object._
 
 Then, based on the position of the object,
 the program decides which surfaces to blit.
 
-| Object Location |  R  |  F  |  D  |  T  |
-|      :---:      |:---:|:---:|:---:|:---:|
-|  **Top-right**  |     |  √  |  √  |  √  |
-|  **Top-left **  |  √  |  √  |  √  |     |
-|**Bottom-left ** |  √  |  √  |     |  √  |
-|**Bottom-right** |  √  |     |  √  |  √  |
+| Object Location |Right face |Front face |Bottom face| Top face  |
+|      :---:      |   :---:   |   :---:   |   :---:   |   :---:   |
+|  **Top-right**  |           |     √     |     √     |     √     |
+|  **Top-left **  |     √     |     √     |     √     |           |
+|**Bottom-left ** |     √     |     √     |           |     √     |
+|**Bottom-right** |     √     |           |     √     |     √     |
 
 
 ```python
@@ -338,6 +340,9 @@ such that the player will know the approximate location of the terrorist.
 This is done by looking at the difference in distances to the terrorist from the
 left and right edges of the player, using some simple trigonometry.
 
+![](readme_assets/hearing_trigo.jpg)
+_Line PT is the distance between the player (P) and the terrorist (T). We can see that the magnitude of the angle should be inversely proportional to the volume produced, thus the ratio between the louder volume and the softer volume would be π/2-(beta-theta):π/2-(beta+theta)_
+
 ```python
 # in human.py
 # is commented out in the 2D code
@@ -359,14 +364,17 @@ class Player(Human):
                 beta = math.pi/2-abs(alpha)
                 theta = math.asin(math.sin(beta)*(TILESIZE/2)/t_dist)
                 total_vol = 1-t_dist/HEARING_RADIUS if total_vol == 0 else (1-t_dist/HEARING_RADIUS+total_vol)/2
-                softer_vol = 2*(beta-theta)/math.pi
-                louder_vol = 2*(beta+theta)/math.pi
+                softer_vol = 2*(math.pi/2-beta+theta)/math.pi
+                louder_vol = 2*(math.pi/2-beta-theta)/math.pi
                 if alpha > 0:
                     l_vol = softer_vol if l_vol == 0 else (l_vol+softer_vol)/2
                     r_vol = louder_vol if r_vol == 0 else (r_vol+louder_vol)/2
                 else:
                     l_vol = louder_vol if l_vol == 0 else (l_vol+softer_vol)/2
                     r_vol = softer_vol if r_vol == 0 else (r_vol+softer_vol)/2
+        self.game.footsteps.set_volume(total_vol/2)
+        self.game.sound_channel.set_volume(l_vol, r_vol)
+        self.game.sound_channel.play(self.game.footsteps)  
 ```
 
 However, due to all the processes that were running, pygame's mixer module
