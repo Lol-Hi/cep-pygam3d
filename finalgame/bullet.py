@@ -7,16 +7,11 @@ class Bullet(pg.sprite.Sprite):
         self.groups = game.all_sprites
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
-        self.image = self.drawImage()
-        self.rect = self.image.get_rect()
+        #self.image = self.drawImage()
+        self.rect = pg.Surface((TILESIZE, TILESIZE)).convert().get_rect()
         self.direction = direction
         self.loc = pg.math.Vector3(x, BULLET_HEIGHT, z)
         self.vx, self.vz = 0, 0
-
-    def drawImage(self):
-        bullet = pg.Surface((BULLET_WIDTH, BULLET_HEIGHT))
-        bullet.fill(DARKGREY)
-        return bullet
 
     def update(self):
         self.vx = math.cos(self.direction)*BULLET_SPEED
@@ -35,6 +30,3 @@ class Bullet(pg.sprite.Sprite):
         if pg.sprite.collide_rect(self, self.game.player):
             self.kill()
             self.game.player.kill()
-
-    def draw(self, screen):
-        screen.blit(self.image, self.rect)

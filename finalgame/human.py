@@ -13,20 +13,29 @@ class Human(pygame.sprite.Sprite):
         self.groups = game.all_sprites
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.game = game
-        self.image = self.drawImage().convert()
-        self.rect = self.image.get_rect()
+        #self.image = self.drawImage().convert()
+        self.rect = pg.Surface((TILESIZE, TILESIZE)).convert().get_rect()
         self.loc = pygame.math.Vector3(x*TILESIZE, y, z*TILESIZE)
         self.rect.x = self.loc.x
         self.rect.y = self.loc.z
         self.vx, self.vz = 0, 0
         self.front = 0
 
-    def drawImage(self):
-        pass
-
     def update(self):
-        self.loc.x += self.vx * self.game.dt
-        self.loc.z += self.vz * self.game.dt
+        self.loc.x = self.loc.x + self.vx * self.game.dt
+        if self.loc.x < TILESIZE:
+            self.loc.x = TILESIZE
+            self.rotate(2*math.pi)
+        if self.loc.x > WIDTH-TILESIZE:
+            self.loc.x = WIDTH-TILESIZE
+            self.rotate(2*math.pi)
+        self.loc.z = self.loc.z + self.vz * self.game.dt
+        if self.loc.z < TILESIZE:
+            self.loc.z = TILESIZE
+            self.rotate(2*math.pi)
+        if self.loc.z > WIDTH-TILESIZE:
+            self.loc.z = WIDTH-TILESIZE
+            self.rotate(2*math.pi)
         self.rect.x = self.loc.x
         hit_x = self.collision_check('x')
         self.rect.y = self.loc.z
@@ -63,29 +72,19 @@ class Human(pygame.sprite.Sprite):
             self.front += 2*math.pi
 
 
-    def draw(self, screen):
-        screen.blit(self.image, self.rect)
-
 class Player(Human):
     def __init__(self, game, x, y, z):
         super().__init__(game, x, y, z)
         self.spritetype = "Civilian"
         self.calling = False
-        self.call_counter = 0
+        self.call_start = 0
+        self.call_time = 0
         self.hear_count = 0
         self.state = 1
 
-    def drawImage(self):
-        player = pygame.Surface((TILESIZE, TILESIZE))
-        player.fill(WHITE)
-        player.set_colorkey(WHITE)
-        pygame.draw.circle(player, RED, (TILESIZE//2, TILESIZE//2), TILESIZE//2)
-        return player
-
-    def get_movement(self):
+    def get_movement(self, keys):
         self.vx, self.vz = 0, 0
         direction = self.front
-        keys = pygame.key.get_pressed()
         if keys[pygame.K_w]:
             if not self.collision_check("x") and not self.collision_check("z"):
                 self.vx, self.vz= PLAYER_SPEED, PLAYER_SPEED
@@ -125,8 +124,7 @@ class Player(Human):
         self.vz *= math.sin(direction)
 
 
-    def get_direction(self):
-        keys = pygame.key.get_pressed()
+    def get_direction(self, keys):
         if keys[pygame.K_LEFT]:
             self.rotate(-PLAYER_TURN)
             self.state = (self.state - 1) % 4
@@ -134,24 +132,27 @@ class Player(Human):
             self.rotate(PLAYER_TURN)
             self.state = (self.state + 1) % 4
 
-    def check_calling(self):
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_e]:
-            self.calling = True
+    def check_calling(self, keys):
+        if not(self.game.countdown_start):
+            if keys[pg.K_e]:
+                self.calling = True
+                self.call_start = pg.time.get_ticks()
 
     def update(self):
-        self.get_direction()
-        self.check_calling()
+        keys = pygame.key.get_pressed()
+        self.get_direction(keys)
+        self.check_calling(keys)
         if self.calling:
-            self.call_counter += 1
-            if self.call_counter >= CALL_TIME:
+            self.call_time = pg.time.get_ticks()-self.call_start
+            if self.call_time > MAX_CALL_TIME*1000:
                 self.calling = False
-                self.game.start_countdown = True
+                self.game.countdown_start = pg.time.get_ticks()
         else:
             self.hear_count += 1
             if self.hear_count%3 == 0:
                 self.hear()
-            self.get_movement()
+            self.detect_terrorists()
+            self.get_movement(keys)
             super().update()
 
     def see(self):
@@ -234,7 +235,7 @@ class Player(Human):
                     r_vol = louder_vol if r_vol == 0 else (r_vol+louder_vol)/2
                 else:
                     l_vol = louder_vol if l_vol == 0 else (l_vol+softer_vol)/2
-                    r_vol = louder_vol if r_vol == 0 else (r_vol+softer_vol)/2
+                    r_vol = softer_vol if r_vol == 0 else (r_vol+softer_vol)/2
         try:
             self.game.footsteps.set_volume(total_vol/2)
             self.game.sound_channel.set_volume(l_vol, r_vol)
@@ -242,6 +243,29 @@ class Player(Human):
         except:
             self.game.footsteps2.set_volume(total_vol/2)
             self.game.footsteps2.play()
+
+    def detect_terrorists(self):
+        for t in self.game.terrorists.sprites():
+            t_dist = distance((self.loc.x, self.loc.z), (t.loc.x, t.loc.z))
+            if t_dist <= DETECTION_RADIUS:
+                angle_diff = self.front - math.atan2(self.loc.z-t.loc.z, self.loc.x-t.loc.x)
+                if in_range(angle_diff, -math.pi/4, math.pi/4):
+                    arrow_orientation = "down"
+                    arrow_x = WIDTH*math.sin(angle_diff)+WIDTH//2
+                    arrow_y = HEIGHT
+                if in_range(angle_diff, math.pi/4, 3*math.pi/4):
+                    arrow_orientation = "right"
+                    arrow_x = WIDTH
+                    arrow_y = HEIGHT*math.cos(angle_diff)+HEIGHT//2
+                if in_range(angle_diff, -3*math.pi/4, -math.pi/4):
+                    arrow_orientation = "left"
+                    arrow_x = 0
+                    arrow_y = HEIGHT*math.cos(-angle_diff)+HEIGHT//2
+                if angle_diff < -3*math.pi/4 or angle_diff > 3*math.pi/4:
+                    arrow_orientation = "up"
+                    arrow_x = -WIDTH*math.sin(-angle_diff)+WIDTH//2
+                    arrow_y = MENU_HEIGHT
+                self.game.arrows.append([arrow_orientation, arrow_x, arrow_y])
 
 
 
@@ -254,13 +278,6 @@ class Terrorist(Human):
         self.action_count = 0
         self.move = True
         self.front = random.choice([-math.pi/2, 0, math.pi/2, math.pi])
-
-    def drawImage(self):
-        terrorist = pygame.Surface((TILESIZE, TILESIZE))
-        terrorist.fill(WHITE)
-        terrorist.set_colorkey(WHITE)
-        pygame.draw.circle(terrorist, BLACK, (TILESIZE//2, TILESIZE//2), TILESIZE//2)
-        return terrorist
 
     def update(self):
         self.search_aim()
@@ -355,13 +372,6 @@ class Civilian(Human):
         self.spritetype = "Civilian"
         self.add(self.game.civilians)
         self.front = random.uniform(-math.pi, math.pi)
-
-    def drawImage(self):
-        civilian = pygame.Surface((TILESIZE, TILESIZE))
-        civilian.fill(WHITE)
-        civilian.set_colorkey(WHITE)
-        pygame.draw.circle(civilian, YELLOW, (TILESIZE//2, TILESIZE//2), TILESIZE//2)
-        return civilian
 
     def update(self):
         self.vx = math.cos(self.front) * NPC_SPEED
