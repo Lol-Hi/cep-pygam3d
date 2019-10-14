@@ -28,6 +28,24 @@ Read the write-up first.
 `mapmaker`: mapmaker
 
 ---
+## Explanation of coordinate system, angles and states
+
+The **x-coordinate** corresponds to the position of the object on the **horizontal axis** of the map, increasing from _left to right_.
+The **z-coordinate** corresponds to the position of the object on the **vertical axis** of the map, increasing from _top to bottom_.
+The **y-coordinate** gives the **height** of the object.
+
+Initially, the player sprite will be facing to the **right**.
+At this stage, it will have an angle of **0 (0º)** – **state 1**.
+
+When the player turns left (anticlockwise), the angle decreases.
+Thus at **-π/2 (-90º)**, the player sprite will be facing the **top** of the map - **state 3**.
+
+When the player turns right (clockwise), the angle increases.
+Thus at **π/2 (90º)**, the player sprite will be facing the **bottom** of the map - **state 2**.
+
+At **±π (±180º)**, the player sprite will be facing the **left** of the map – **state 0**
+
+---
 ## Build Status
 Game mechanics
 * Controlling the movement of the player sprite: `Working`
@@ -62,6 +80,10 @@ Additional game features
 ## Features
 
 #### 3d to Pseudo-3d conversion
+The initial location of the camera is positioned at (3, 17, 0),
+which is derived from the position of the eyes on an actual person.
+
+The angle of the 3D coordinate from the camera is measured, then it is used together with the dimensions of the screen and the field of view of the player to determine the pseudo-3d coordinate.
 
 ```python
 # in bet3d.py
@@ -120,6 +142,193 @@ def getY(vector):
 
 def Get(vector):
     return(getX(vector), getY(vector))
+```
+
+#### Drawing Pseudo-3d shapes
+Firstly, the lengths and vertices of the cuboid have to be determined,
+and then altered based on the diagram below:
+
+
+Then, based on the position of the object,
+the program decides which surfaces to blit.
+
+| Object Location |  R  |  F  |  D  |  T  |
+|      :---:      |:---:|:---:|:---:|:---:|
+|  **Top-right**  |     |  √  |  √  |  √  |
+|  **Top-left **  |  √  |  √  |  √  |     |
+|**Bottom-left ** |  √  |  √  |     |  √  |
+|**Bottom-right** |  √  |     |  √  |  √  |
+
+
+```python
+# in raw3d.py
+def cuboid(screen, corner1, corner2, state, colorscheme = "normal", brightness = 1):
+    lenX = corner1[0] - corner2[0]
+    lenY = corner1[1] - corner2[1]
+    lenZ = corner1[2] - corner2[2]
+
+    verticeA = corner1
+    verticeB = (verticeA[0] - lenX, verticeA[1], verticeA[2])
+    verticeC = (verticeB[0], verticeB[1] - lenY, verticeB[2])
+    verticeD = (verticeC[0] + lenX, verticeC[1], verticeC[2])
+
+    verticeE = (verticeA[0], verticeA[1], verticeA[2] - lenZ)
+    verticeF = (verticeB[0], verticeB[1], verticeB[2] - lenZ)
+    verticeG = (verticeC[0], verticeC[1], verticeC[2] - lenZ)
+    verticeH = (verticeD[0], verticeD[1], verticeD[2] - lenZ)
+
+    if state == 1:
+        bet._eyeX = bet._OGeyeX
+        bet._eyeZ = bet._OGeyeZ
+    elif state == 2:
+        oldX = bet._OGeyeX
+        oldZ = bet._OGeyeZ
+
+        bet._eyeX = oldZ
+        bet._eyeZ = -oldX
+
+        verticeA = (verticeA[2], verticeA[1], -verticeA[0])
+        verticeB = (verticeB[2], verticeB[1], -verticeB[0])
+        verticeC = (verticeC[2], verticeC[1], -verticeC[0])
+        verticeD = (verticeD[2], verticeD[1], -verticeD[0])
+        verticeE = (verticeE[2], verticeE[1], -verticeE[0])
+        verticeF = (verticeF[2], verticeF[1], -verticeF[0])
+        verticeG = (verticeG[2], verticeG[1], -verticeG[0])
+        verticeH = (verticeH[2], verticeH[1], -verticeH[0])
+
+    elif state == 3:
+        bet._eyeX = -bet._OGeyeX
+        bet._eyeZ = -bet._OGeyeZ
+
+        verticeA = (-verticeA[0], verticeA[1], -verticeA[2])
+        verticeB = (-verticeB[0], verticeB[1], -verticeB[2])
+        verticeC = (-verticeC[0], verticeC[1], -verticeC[2])
+        verticeD = (-verticeD[0], verticeD[1], -verticeD[2])
+        verticeE = (-verticeE[0], verticeE[1], -verticeE[2])
+        verticeF = (-verticeF[0], verticeF[1], -verticeF[2])
+        verticeG = (-verticeG[0], verticeG[1], -verticeG[2])
+        verticeH = (-verticeH[0], verticeH[1], -verticeH[2])
+
+    elif state == 0:
+        oldX = bet._OGeyeX
+        oldZ = bet._OGeyeZ
+
+        bet._eyeX = -oldZ
+        bet._eyeZ = oldX
+
+        verticeA = (-verticeA[2], verticeA[1], verticeA[0])
+        verticeB = (-verticeB[2], verticeB[1], verticeB[0])
+        verticeC = (-verticeC[2], verticeC[1], verticeC[0])
+        verticeD = (-verticeD[2], verticeD[1], verticeD[0])
+        verticeE = (-verticeE[2], verticeE[1], verticeE[0])
+        verticeF = (-verticeF[2], verticeF[1], verticeF[0])
+        verticeG = (-verticeG[2], verticeG[1], verticeG[0])
+        verticeH = (-verticeH[2], verticeH[1], verticeH[0])
+
+    posX = 0
+    posY = 0
+    if verticeE[2] > bet._eyeZ:
+        posX = 1
+    elif verticeA[2] < bet._eyeZ:
+        posX = -1
+    else:
+        posX = 0
+
+    if verticeC[1] < bet._eyeY:
+        posY = 1
+    elif verticeA[1] > bet._eyeY:
+        posY = -1
+    else:
+        posY = 0
+
+    verticeA = bet.Get(verticeA)
+    verticeB = bet.Get(verticeB)
+    verticeC = bet.Get(verticeC)
+    verticeD = bet.Get(verticeD)
+    verticeE = bet.Get(verticeE)
+    verticeF = bet.Get(verticeF)
+    verticeG = bet.Get(verticeG)
+    verticeH = bet.Get(verticeH)
+
+    if state == 1:
+        faceRight = [verticeA, verticeB, verticeC, verticeD]
+        faceLeft = [verticeE, verticeF, verticeG, verticeH]
+        faceBack = [verticeB, verticeC, verticeG, verticeF]
+        faceFront = [verticeA, verticeD, verticeH, verticeE]
+        faceTop = [verticeA, verticeB, verticeF, verticeE]
+        faceBottom = [verticeD, verticeC, verticeG, verticeH]
+
+    elif state == 2:
+        faceFront = [verticeE, verticeF, verticeG, verticeH]
+        faceBack = [verticeA, verticeB, verticeC, verticeD]
+        faceRight = [verticeA, verticeD, verticeH, verticeE]
+        faceLeft = [verticeB, verticeC, verticeG, verticeF]
+        faceTop = [verticeA, verticeB, verticeF, verticeE]
+        faceBottom = [verticeD, verticeC, verticeG, verticeH]
+
+    elif state == 3:
+        faceLeft = [verticeA, verticeB, verticeC, verticeD]
+        faceRight = [verticeE, verticeF, verticeG, verticeH]
+        faceFront = [verticeB, verticeC, verticeG, verticeF]
+        faceBack = [verticeA, verticeD, verticeH, verticeE]
+        faceTop = [verticeA, verticeB, verticeF, verticeE]
+        faceBottom = [verticeD, verticeC, verticeG, verticeH]
+
+    elif state == 0:
+        faceFront = [verticeA, verticeB, verticeC, verticeD]
+        faceBack = [verticeE, verticeF, verticeG, verticeH]
+        faceRight = [verticeB, verticeC, verticeG, verticeF]
+        faceLeft = [verticeA, verticeD, verticeH, verticeE]
+        faceTop = [verticeA, verticeB, verticeF, verticeE]
+        faceBottom = [verticeD, verticeC, verticeG, verticeH]
+
+    tblue = BLUE
+    tgreen = GREEN
+    tblack = BLACK
+
+    if colorscheme == "black":
+        tblue = BLACK
+        tgreen = BLACK
+
+    if colorscheme == "white":
+        tblue = WHITE
+        tgreen = WHITE
+        tblack = WHITE
+
+    tblue = tuple([brightness*x for x in tblue])
+    tgreen = tuple([brightness * x for x in tgreen])
+    tblack = tuple([brightness * x for x in tblack])
+
+    if posX == -1 and posY == -1:
+        pygame.draw.polygon(screen, tblue, faceRight)
+        pygame.draw.polygon(screen, tgreen, faceFront)
+        pygame.draw.polygon(screen, tblack, faceBottom)
+    elif posX == 1 and posY == -1:
+        pygame.draw.polygon(screen, tblue, faceLeft)
+        pygame.draw.polygon(screen, tgreen, faceFront)
+        pygame.draw.polygon(screen, tblack, faceBottom)
+    elif posX == 1 and posY == 1:
+        pygame.draw.polygon(screen, tblue, faceLeft)
+        pygame.draw.polygon(screen, tgreen, faceFront)
+        pygame.draw.polygon(screen, tblack, faceTop)
+    elif posX == -1 and posY == 1:
+        pygame.draw.polygon(screen, tblue, faceRight)
+        pygame.draw.polygon(screen, tgreen, faceFront)
+        pygame.draw.polygon(screen, tblack, faceTop)
+    elif posX == 0 and posY == 1:
+        pygame.draw.polygon(screen, tgreen, faceFront)
+        pygame.draw.polygon(screen, tblack, faceBottom)
+    elif posX == 0 and posY == -1:
+        pygame.draw.polygon(screen, tgreen, faceFront)
+        pygame.draw.polygon(screen, tblack, faceTop)
+    elif posX == 1 and posY == 0:
+        pygame.draw.polygon(screen, tblue, faceLeft)
+        pygame.draw.polygon(screen, tgreen, faceFront)
+    elif posX == -1 and posY == 0:
+        pygame.draw.polygon(screen, tblue, faceRight)
+        pygame.draw.polygon(screen, tgreen, faceFront)
+    elif posX == 0 and posY == 0:
+        pygame.draw.polygon(screen, tgreen, faceFront)
 ```
 
 #### Terrorist detecting mechanism for player
@@ -300,6 +509,16 @@ class Terrorist(Human):
 ## Screenshots
 
 These screenshots are obtained from running the code in `finalgame`.
+
+![](readme_assets/start_screen.png)
+##### Start screen
+
+![](readme_assets/gameplay.png)
+##### Screenshot of the gameplay
+- _Note the arrows at the edges which indicate the general direction of the terrorists, and the phone which appears while the player calls the police_
+
+![](readme_assets/fail_screen.png)
+##### End screen upon failing a level (getting shot)
 
 ---
 ## Installation
