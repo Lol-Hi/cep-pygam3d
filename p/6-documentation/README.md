@@ -13,6 +13,20 @@ educational game such that people can be more aware about what to do during a
 terrorist attack.
 
 ---
+## Using this branch
+Read the write-up first.
+
+2d_demonstration: demonstration of 2d engine
+
+3d_demonstration: demonstration of 3d engine
+
+finalgame: our end product
+
+freeroam: our end product but with death, terrorists and civilians turned off
+
+mapmaker: mapmaker
+
+---
 ## Build Status
 Game mechanics
 * Controlling the movement of the player sprite: `Working`
@@ -43,6 +57,42 @@ Pseudo-3D representation
 #### Terrorist detecting mechanism for player
 Initially we wanted to play a sound when the player is near the terrorist,
 such that the player will know the approximate location of the terrorist.
+
+This is done by looking at the difference in distances to the terrorist from the
+left and right edges of the player, using some simple trigonometry.
+
+
+
+```python
+# in human.py
+# is commented out in the 2D code
+
+def hear(self):
+    l_vol, r_vol = 0, 0
+    total_vol = 0
+    t_nearby = 0
+    for t in self.game.terrorists.sprites():
+        t_dist = distance((self.loc.x, self.loc.z), (t.loc.x, t.loc.z))
+        t_phi = math.atan2(self.loc.z-t.loc.z, self.loc.x-t.loc.x)
+        if t_dist == 0:
+            total_vol = 1
+            l_vol, r_vol = 1, 1
+        elif t_dist <= HEARING_RADIUS:
+            t_nearby += 1
+            alpha = signed_basic_angle(self.front-t_phi)
+            beta = math.pi/2-abs(alpha)
+            theta = math.asin(math.sin(beta)*(TILESIZE/2)/t_dist)
+            total_vol = 1-t_dist/HEARING_RADIUS if total_vol == 0 else (1-t_dist/HEARING_RADIUS+total_vol)/2
+            softer_vol = 2*(beta-theta)/math.pi
+            louder_vol = 2*(beta+theta)/math.pi
+            if alpha > 0:
+                l_vol = softer_vol if l_vol == 0 else (l_vol+softer_vol)/2
+                r_vol = louder_vol if r_vol == 0 else (r_vol+louder_vol)/2
+            else:
+                l_vol = louder_vol if l_vol == 0 else (l_vol+softer_vol)/2
+                r_vol = louder_vol if r_vol == 0 else (r_vol+softer_vol)/2
+```
+
 However, due to all the processes that were running, pygame's mixer module
 kept producing a `NULL tstate` error.
 Thus, we had to settle for another method, which is to use markers on the edge
@@ -189,6 +239,10 @@ If not, you can install it [here](https://www.python.org/downloads/).
 
 Secondly, ensure that you have downloaded the following files and folders for
 the program
+* `assets` – containing the soundtrack that plays when terrorists are near
+  the player
+  *  `footsteps.wav` – the soundtrack that plays when terrorists are near the
+  player
 * `maps` – containing the set ups for the different levels for the game
   * `1.txt` – Level 1
   * `2.txt` – Level 2
@@ -210,16 +264,23 @@ If not, you can follow the instructions [here](https://www.pygame.org/wiki/Getti
 
 ---
 ## How to use?
+
+#### General instructions applicable to both versions
 The game may simply be run by running ```main.py```.
 
 When the game runs, a start screen is shown.
 Press `ENTER`/`return` to play the game.
 
-The player's movement is controlled by the WASD keys, while the left and right
-arrow keys allow the player to turn and look in different directions.
-In order to win the level, you will have to press the E key at a safe spot
-to call the police, and then wait for the police to arrive.
-Note that you will not be able to move when calling the police,
-but you can move to other locations after the call when waiting for the police.
+The player can move forward and backwards by pressing the `W` and `A` keys
+respectively, white turning is achieved with the left and right arrow keys.
 
-You win the game when the police arrive and lose the game when you get shot.
+#### Instructions in the 2d code
+In order to win the game, the player has to press the `E` key to call the police.
+The call will take 10 seconds, during which the player will not be able to move,
+but he can still be shot by the terrorists.
+After the 10 seconds, the police will take 30 seconds to arrive, thus the player
+will have to survive during that time.
+During this 30 seconds he will be able to move.
+
+You win the game when the police arrive after the 30 seconds
+and lose the game when you get shot.
