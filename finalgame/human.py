@@ -142,16 +142,16 @@ class Player(Human):
         keys = pygame.key.get_pressed()
         self.get_direction(keys)
         self.check_calling(keys)
+        self.hear_count += 1
+        if self.hear_count%3 == 0:
+            self.hear()
+        self.detect_terrorists()
         if self.calling:
             self.call_time = pg.time.get_ticks()-self.call_start
             if self.call_time > MAX_CALL_TIME*1000:
                 self.calling = False
                 self.game.countdown_start = pg.time.get_ticks()
         else:
-            self.hear_count += 1
-            if self.hear_count%3 == 0:
-                self.hear()
-            self.detect_terrorists()
             self.get_movement(keys)
             super().update()
 
@@ -236,13 +236,13 @@ class Player(Human):
                 else:
                     l_vol = louder_vol if l_vol == 0 else (l_vol+softer_vol)/2
                     r_vol = softer_vol if r_vol == 0 else (r_vol+softer_vol)/2
-        try:
-            self.game.footsteps.set_volume(total_vol/2)
-            self.game.sound_channel.set_volume(l_vol, r_vol)
-            self.game.sound_channel.play(self.game.footsteps)
-        except:
-            self.game.footsteps2.set_volume(total_vol/2)
-            self.game.footsteps2.play()
+        # try:
+        #     self.game.footsteps.set_volume(total_vol/2)
+        #     self.game.sound_channel.set_volume(l_vol, r_vol)
+        #     self.game.sound_channel.play(self.game.footsteps)
+        # except:
+        #     self.game.footsteps2.set_volume(total_vol/2)
+        #     self.game.footsteps2.play()
 
     def detect_terrorists(self):
         for t in self.game.terrorists.sprites():
