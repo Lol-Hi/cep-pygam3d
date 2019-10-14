@@ -16,15 +16,16 @@ terrorist attack.
 ## Using this branch
 Read the write-up first.
 
-2d_demonstration: demonstration of 2d engine
+`2d_demonstration`: demonstration of 2d engine
 
-3d_demonstration: demonstration of 3d engine
+`3d_demonstration`: demonstration of 3d engine
 
-finalgame: our end product
+`finalgame`: our end product with all the features
+- **commented code is found here**
 
-freeroam: our end product but with death, terrorists and civilians turned off
+`freeroam`: our end product but with death, terrorists and civilians turned off
 
-mapmaker: mapmaker
+`mapmaker`: mapmaker
 
 ---
 ## Build Status
@@ -32,11 +33,13 @@ Game mechanics
 * Controlling the movement of the player sprite: `Working`
 * Controlling the turning of the player sprite: `Working`
 * Shooting mechanism for terrorists: `Building`
-* Preventing players from walking into walls: `Building`
+  * Sometimes the bullets will still shoot through the walls
+* Preventing players from walking into walls: `Working`
 * Sighting and aiming mechanism for terrorists: `Working`
 * Movement of terrorists: `Working`
 * Movement of civilians: `Working`
 * Hearing mechanism: `Building`
+  * Works, but will result in `NULL tstate` error
 * Calling the police: `Working`
 
 Mapmaker
@@ -47,12 +50,77 @@ Pseudo-3D representation
 * Creating basic objects and shapes: `Working`
 * Creating converging sceneries: `Working`
 * Allowing for movement and turning: `Working`
-* Converting the 2D representation to a pseudo-3D representation: `Building`
+* Drawing pseudo-3d walls and floor (integration): `Working`
+* Drawing pseudo-3d figures (intergration): `Building`
+
+Additional game features
+* Start and end screens: `Working`
+* Menu bar: `Working`
+* Phone (when calling): `Working`
 
 ---
 ## Features
 
-#### 2d to 3d conversion
+#### 3d to Pseudo-3d conversion
+
+```python
+# in bet3d.py
+def getX(vector):
+    pointX = vector[0] - _eyeX
+    pointY = 0
+    pointZ = vector[2] - _eyeZ
+
+    extendX = pointX
+    extendY = 0
+    extendZ = 0
+
+    if (extendX, extendY, extendZ) == (0, 0, 0):
+        if pointX == 0 and pointZ == 0:
+            angle = 0
+        else:
+            if pointX == 0:
+                angle = 90
+    else:
+        pointVector = pygame.math.Vector3(pointX, pointY, pointZ)
+        extendVector = pygame.math.Vector3(extendX, extendY, extendZ)
+        angle = pointVector.angle_to(extendVector)
+
+    if pointX < 0:
+        angle = (180 - angle) % 180
+    if pointZ < 0:
+        angle *= -1
+
+    translatedX = (_fovX / 2 + angle) / _fovX * _screenWidth
+    return translatedX
+
+def getY(vector):
+    pointX = vector[0] - _eyeX
+    pointY = vector[1] - _eyeY
+    pointZ = 0
+
+    extendX = pointX
+    extendY = 0
+    extendZ = pointZ
+
+    if (extendX, extendY, extendZ) == (0, 0, 0):
+        angle = 90
+    else:
+        pointVector = pygame.math.Vector3(pointX, pointY, pointZ)
+        extendVector = pygame.math.Vector3(extendX, extendY, extendZ)
+
+        angle = pointVector.angle_to(extendVector)
+
+    if pointX < 0:
+        angle = 180 - angle
+    if pointY > 0:
+        angle *= -1
+
+    translatedY = (_fovY / 2 + angle) / _fovY * _screenHeight
+    return translatedY
+
+def Get(vector):
+    return(getX(vector), getY(vector))
+```
 
 #### Terrorist detecting mechanism for player
 Initially we wanted to play a sound when the player is near the terrorist,
@@ -61,36 +129,35 @@ such that the player will know the approximate location of the terrorist.
 This is done by looking at the difference in distances to the terrorist from the
 left and right edges of the player, using some simple trigonometry.
 
-
-
 ```python
 # in human.py
 # is commented out in the 2D code
-
-def hear(self):
-    l_vol, r_vol = 0, 0
-    total_vol = 0
-    t_nearby = 0
-    for t in self.game.terrorists.sprites():
-        t_dist = distance((self.loc.x, self.loc.z), (t.loc.x, t.loc.z))
-        t_phi = math.atan2(self.loc.z-t.loc.z, self.loc.x-t.loc.x)
-        if t_dist == 0:
-            total_vol = 1
-            l_vol, r_vol = 1, 1
-        elif t_dist <= HEARING_RADIUS:
-            t_nearby += 1
-            alpha = signed_basic_angle(self.front-t_phi)
-            beta = math.pi/2-abs(alpha)
-            theta = math.asin(math.sin(beta)*(TILESIZE/2)/t_dist)
-            total_vol = 1-t_dist/HEARING_RADIUS if total_vol == 0 else (1-t_dist/HEARING_RADIUS+total_vol)/2
-            softer_vol = 2*(beta-theta)/math.pi
-            louder_vol = 2*(beta+theta)/math.pi
-            if alpha > 0:
-                l_vol = softer_vol if l_vol == 0 else (l_vol+softer_vol)/2
-                r_vol = louder_vol if r_vol == 0 else (r_vol+louder_vol)/2
-            else:
-                l_vol = louder_vol if l_vol == 0 else (l_vol+softer_vol)/2
-                r_vol = louder_vol if r_vol == 0 else (r_vol+softer_vol)/2
+class Player(Human):
+    # ...
+    def hear(self):
+        l_vol, r_vol = 0, 0
+        total_vol = 0
+        t_nearby = 0
+        for t in self.game.terrorists.sprites():
+            t_dist = distance((self.loc.x, self.loc.z), (t.loc.x, t.loc.z))
+            t_phi = math.atan2(self.loc.z-t.loc.z, self.loc.x-t.loc.x)
+            if t_dist == 0:
+                total_vol = 1
+                l_vol, r_vol = 1, 1
+            elif t_dist <= HEARING_RADIUS:
+                t_nearby += 1
+                alpha = signed_basic_angle(self.front-t_phi)
+                beta = math.pi/2-abs(alpha)
+                theta = math.asin(math.sin(beta)*(TILESIZE/2)/t_dist)
+                total_vol = 1-t_dist/HEARING_RADIUS if total_vol == 0 else (1-t_dist/HEARING_RADIUS+total_vol)/2
+                softer_vol = 2*(beta-theta)/math.pi
+                louder_vol = 2*(beta+theta)/math.pi
+                if alpha > 0:
+                    l_vol = softer_vol if l_vol == 0 else (l_vol+softer_vol)/2
+                    r_vol = louder_vol if r_vol == 0 else (r_vol+louder_vol)/2
+                else:
+                    l_vol = louder_vol if l_vol == 0 else (l_vol+softer_vol)/2
+                    r_vol = softer_vol if r_vol == 0 else (r_vol+softer_vol)/2
 ```
 
 However, due to all the processes that were running, pygame's mixer module
@@ -230,7 +297,9 @@ class Terrorist(Human):
 ```
 
 ---
-## Screenshots and Video
+## Screenshots
+
+These screenshots are obtained from running the code in `finalgame`.
 
 ---
 ## Installation
@@ -238,7 +307,7 @@ Firstly, ensure that python3 is installed on your computer.
 If not, you can install it [here](https://www.python.org/downloads/).
 
 Secondly, ensure that you have downloaded the following files and folders for
-the program
+the program (full set in `finalgame`)
 * `assets` – containing the soundtrack that plays when terrorists are near
   the player
   *  `footsteps.wav` – the soundtrack that plays when terrorists are near the
